@@ -1,0 +1,14 @@
+# Dependências
+node_modules/
+
+# Credenciais — NUNCA subir para o GitHub
+serviceAccountKey.json
+*.json.key
+
+# Ambiente local
+.env
+data.json
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

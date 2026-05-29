@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: barbearia-don-mateus-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: USE_LOCAL
+        value: false
+      - key: PORT
+        value: 3001
+      - key: FIREBASE_CREDENTIALS
+        sync: false   # você preenche manualmente no painel do Render

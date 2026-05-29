@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Barbearia Don Mateus — Agendamentos</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>✂ Don Mateus</h1>
+      <p>Barbearia Don Mateus</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html"        class="nav-item"><span class="icon">◼</span> Dashboard</a>
+      <a href="agendamentos.html" class="nav-item active"><span class="icon">📅</span> Agendamentos</a>
+      <a href="barbeiros.html"    class="nav-item"><span class="icon">👤</span> Barbeiros</a>
+    </nav>
+
+  </aside>
+
+  <!-- ── Conteúdo ── -->
+  <main class="main">
+    <div class="page-header">
+      <h2>Agendamentos</h2>
+      <p>Gerencie os agendamentos da barbearia</p>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card-header">
+        <h3>Lista de Agendamentos</h3>
+        <button class="btn btn-primary" onclick="abrirModalNovo()">+ Novo Agendamento</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Telefone</th>
+            <th>Barbeiro</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Serviços</th>
+            <th>Valor Total</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-agendamentos">
+          <tr><td colspan="9"><div class="empty-state"><p>Carregando...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ── Modal: Inserir / Editar Agendamento ── -->
+  <div class="modal-overlay" id="modal-agendamento">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-titulo">Novo Agendamento</h3>
+        <button class="modal-close" onclick="fecharModal('modal-agendamento')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="campo-id" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do Cliente *</label>
+            <input type="text" id="campo-nomeCliente" placeholder="João da Silva" />
+          </div>
+          <div class="form-group">
+            <label>CPF</label>
+            <input type="text" id="campo-cpf" placeholder="000.000.000-00" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefone *</label>
+            <input type="text" id="campo-telefone" placeholder="(11) 99999-9999" />
+          </div>
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="campo-email" placeholder="cliente@email.com" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data *</label>
+            <input type="date" id="campo-data" />
+          </div>
+          <div class="form-group">
+            <label>Hora *</label>
+            <input type="time" id="campo-hora" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Barbeiro *</label>
+            <select id="campo-barbeiroId">
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="campo-status">
+              <option value="agendado">Agendado</option>
+              <option value="confirmado">Confirmado</option>
+              <option value="concluido">Concluído</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Observação</label>
+          <textarea id="campo-observacao" rows="2" placeholder="Alguma preferência ou observação..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="fecharModal('modal-agendamento')">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarAgendamento()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Calcular Valor (Decorator) ── -->
+  <div class="modal-overlay" id="modal-calcular">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Calcular Valor do Agendamento</h3>
+        <button class="modal-close" onclick="fecharModal('modal-calcular')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem;color:var(--cor-texto-suave);margin-bottom:16px">
+          Selecione os serviços extras. O Decorator calcula o valor total automaticamente.
+        </p>
+
+        <input type="hidden" id="calcular-id" />
+
+        <div class="servicos-grid">
+          <label class="servico-check">
+            <input type="checkbox" value="barba" /> ✂
+            <div><div class="nome">Barba</div><div class="preco">+ R$ 20,00</div></div>
+          </label>
+          <label class="servico-check">
+            <input type="checkbox" value="hidratacao" /> 💧
+            <div><div class="nome">Hidratação</div><div class="preco">+ R$ 25,00</div></div>
+          </label>
+          <label class="servico-check">
+            <input type="checkbox" value="sobrancelha" /> 👁
+            <div><div class="nome">Sobrancelha</div><div class="preco">+ R$ 10,00</div></div>
+          </label>
+          <label class="servico-check">
+            <input type="checkbox" value="tratamentoCapilar" /> 🌿
+            <div><div class="nome">Trat. Capilar</div><div class="preco">+ R$ 35,00</div></div>
+          </label>
+        </div>
+
+        <!-- Resultado do Decorator aparece aqui -->
+        <div class="resultado-calculo" id="resultado-calculo" style="display:none">
+          <div class="descricao" id="resultado-descricao"></div>
+          <div class="total" id="resultado-total"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="fecharModal('modal-calcular')">Fechar</button>
+        <button class="btn btn-primary" onclick="aplicarDecorator()">Calcular e Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    let agendamentos = [];
+    let barbeiros    = [];
+
+    // ── Carregar dados ────────────────────────────────────────
+    async function carregar() {
+      try {
+        [agendamentos, barbeiros] = await Promise.all([
+          api.listarAgendamentos(),
+          api.listarBarbeiros()
+        ]);
+        renderizarTabela();
+        popularSelectBarbeiros();
+      } catch (e) {
+        toast('Erro ao carregar dados.', 'erro');
+      }
+    }
+
+    function popularSelectBarbeiros() {
+      const select = document.getElementById('campo-barbeiroId');
+      select.innerHTML = '<option value="">Selecione...</option>';
+      barbeiros
+        .filter(b => b.status === 'ativo')
+        .forEach(b => {
+          select.innerHTML += `<option value="${b.id}">${b.nome}</option>`;
+        });
+    }
+
+    function renderizarTabela() {
+      const tbody = document.getElementById('tabela-agendamentos');
+      if (agendamentos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+          <div class="icon">📅</div><p>Nenhum agendamento cadastrado.</p>
+        </div></td></tr>`;
+        return;
+      }
+      tbody.innerHTML = agendamentos.map(a => `
+        <tr>
+          <td><strong>${a.nomeCliente || '—'}</strong><br>
+              <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${a.telefone || ''}</span></td>
+          <td>${a.telefone || '—'}</td>
+          <td>${a.barbeiroNome || '—'}</td>
+          <td>${formatarData(a.data)}</td>
+          <td>${a.hora || '—'}</td>
+          <td style="font-size:0.8rem;max-width:180px;color:var(--cor-texto-suave)">${a.descricaoServicos || 'Corte de Cabelo'}</td>
+          <td style="font-weight:600;color:var(--cor-dourado)">${formatarMoeda(a.valorTotal)}</td>
+          <td>${badgeStatus(a.status)}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-success btn-sm" onclick="abrirCalcular('${a.id}')" title="Calcular Valor (Decorator)">💰</button>
+              <button class="btn btn-ghost btn-sm" onclick="abrirEditar('${a.id}')">✏</button>
+              <button class="btn btn-danger btn-sm" onclick="deletar('${a.id}')">🗑</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Novo agendamento ─────────────────────────────────────
+    function abrirModalNovo() {
+      document.getElementById('modal-titulo').textContent = 'Novo Agendamento';
+      document.getElementById('campo-id').value        = '';
+      document.getElementById('campo-nomeCliente').value = '';
+      document.getElementById('campo-cpf').value       = '';
+      document.getElementById('campo-telefone').value  = '';
+      document.getElementById('campo-email').value     = '';
+      document.getElementById('campo-data').value      = new Date().toISOString().split('T')[0];
+      document.getElementById('campo-hora').value      = '';
+      document.getElementById('campo-barbeiroId').value = '';
+      document.getElementById('campo-status').value    = 'agendado';
+      document.getElementById('campo-observacao').value = '';
+      abrirModal('modal-agendamento');
+    }
+
+    // ── Editar agendamento ───────────────────────────────────
+    function abrirEditar(id) {
+      const a = agendamentos.find(x => x.id === id);
+      if (!a) return;
+      document.getElementById('modal-titulo').textContent  = 'Editar Agendamento';
+      document.getElementById('campo-id').value            = a.id;
+      document.getElementById('campo-nomeCliente').value  = a.nomeCliente || '';
+      document.getElementById('campo-cpf').value          = a.cpf || '';
+      document.getElementById('campo-telefone').value     = a.telefone || '';
+      document.getElementById('campo-email').value        = a.email || '';
+      document.getElementById('campo-data').value         = a.data || '';
+      document.getElementById('campo-hora').value         = a.hora || '';
+      document.getElementById('campo-barbeiroId').value   = a.barbeiroId || '';
+      document.getElementById('campo-status').value       = a.status || 'agendado';
+      document.getElementById('campo-observacao').value   = a.observacao || '';
+      abrirModal('modal-agendamento');
+    }
+
+    // ── Salvar (inserir ou atualizar) ────────────────────────
+    async function salvarAgendamento() {
+      const id = document.getElementById('campo-id').value;
+      const dados = {
+        nomeCliente:  document.getElementById('campo-nomeCliente').value,
+        cpf:          document.getElementById('campo-cpf').value,
+        telefone:     document.getElementById('campo-telefone').value,
+        email:        document.getElementById('campo-email').value,
+        data:         document.getElementById('campo-data').value,
+        hora:         document.getElementById('campo-hora').value,
+        barbeiroId:   document.getElementById('campo-barbeiroId').value,
+        status:       document.getElementById('campo-status').value,
+        observacao:   document.getElementById('campo-observacao').value,
+        valorBase:    30,
+        valorTotal:   30,
+        descricaoServicos: 'Corte de Cabelo'
+      };
+
+      if (!dados.nomeCliente || !dados.telefone || !dados.data || !dados.hora || !dados.barbeiroId) {
+        toast('Preencha os campos obrigatórios (*).', 'erro');
+        return;
+      }
+      if (dados.email && !emailValido(dados.email)) {
+        toast('E-mail inválido. Use o formato nome@dominio.com', 'erro');
+        return;
+      }
+
+      try {
+        if (id) {
+          await api.atualizarAgendamento(id, dados);
+          toast('Agendamento atualizado com sucesso!');
+        } else {
+          await api.inserirAgendamento(dados);
+          toast('Agendamento criado com sucesso!');
+        }
+        fecharModal('modal-agendamento');
+        carregar();
+      } catch (e) {
+        toast('Erro ao salvar agendamento.', 'erro');
+      }
+    }
+
+    // ── Deletar ──────────────────────────────────────────────
+    async function deletar(id) {
+      if (!confirm('Confirma a exclusão deste agendamento?')) return;
+      try {
+        await api.deletarAgendamento(id);
+        toast('Agendamento removido.');
+        carregar();
+      } catch (e) {
+        toast('Erro ao deletar.', 'erro');
+      }
+    }
+
+    // ── Calcular Valor (Decorator) ───────────────────────────
+    function abrirCalcular(id) {
+      document.getElementById('calcular-id').value = id;
+      document.getElementById('resultado-calculo').style.display = 'none';
+      // Desmarca todos os checkboxes
+      document.querySelectorAll('#modal-calcular input[type="checkbox"]')
+        .forEach(cb => cb.checked = false);
+      abrirModal('modal-calcular');
+    }
+
+    async function aplicarDecorator() {
+      const id     = document.getElementById('calcular-id').value;
+      const extras = Array.from(
+        document.querySelectorAll('#modal-calcular input[type="checkbox"]:checked')
+      ).map(cb => cb.value);
+
+      try {
+        const resultado = await api.calcularValor(id, extras);
+
+        // Exibe o resultado do Decorator
+        document.getElementById('resultado-descricao').textContent = resultado.descricaoServicos;
+        document.getElementById('resultado-total').textContent     = formatarMoeda(resultado.valorTotal);
+        document.getElementById('resultado-calculo').style.display = 'block';
+
+        toast('Valor calculado e salvo com sucesso!');
+        carregar(); // Atualiza a tabela
+      } catch (e) {
+        toast('Erro ao calcular valor.', 'erro');
+      }
+    }
+
+    // Inicia — aplica máscaras e carrega dados
+    aplicarMascaras({ cpf: 'campo-cpf', telefone: 'campo-telefone' });
+    carregar();
+  </script>
+</body>
+</html>

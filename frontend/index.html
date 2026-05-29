@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Barbearia Don Mateus — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>✂ Don Mateus</h1>
+      <p>Barbearia Don Mateus</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html"        class="nav-item active"><span class="icon">◼</span> Dashboard</a>
+      <a href="agendamentos.html" class="nav-item"><span class="icon">📅</span> Agendamentos</a>
+      <a href="barbeiros.html"    class="nav-item"><span class="icon">👤</span> Barbeiros</a>
+    </nav>
+
+  </aside>
+
+  <!-- ── Conteúdo ── -->
+  <main class="main">
+    <div class="page-header">
+      <h2>Dashboard</h2>
+      <p>Visão geral da barbearia</p>
+    </div>
+
+    <!-- Cards de estatísticas -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Agendamentos Hoje</div>
+        <div class="value" id="stat-hoje">—</div>
+        <div class="sub">do dia</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total de Agendamentos</div>
+        <div class="value" id="stat-total">—</div>
+        <div class="sub">cadastrados</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Barbeiros Ativos</div>
+        <div class="value" id="stat-barbeiros">—</div>
+        <div class="sub">profissionais</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Receita do Dia</div>
+        <div class="value" id="stat-receita">—</div>
+        <div class="sub">agendamentos concluídos</div>
+      </div>
+    </div>
+
+    <!-- Tabela de próximos agendamentos -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h3>Próximos Agendamentos</h3>
+        <a href="agendamentos.html" class="btn btn-ghost btn-sm">Ver todos</a>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Barbeiro</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Serviços</th>
+            <th>Valor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-dashboard">
+          <tr><td colspan="7"><div class="empty-state"><p>Carregando...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    async function carregarDashboard() {
+      try {
+        const [agendamentos, barbeiros] = await Promise.all([
+          api.listarAgendamentos(),
+          api.listarBarbeiros()
+        ]);
+
+        const hoje     = new Date().toISOString().split('T')[0];
+        const deHoje   = agendamentos.filter(a => a.data === hoje);
+        const concluidos = deHoje.filter(a => a.status === 'concluido');
+        const receita  = concluidos.reduce((s, a) => s + Number(a.valorTotal || 0), 0);
+        const ativos   = barbeiros.filter(b => b.status === 'ativo');
+
+        document.getElementById('stat-hoje').textContent      = deHoje.length;
+        document.getElementById('stat-total').textContent     = agendamentos.length;
+        document.getElementById('stat-barbeiros').textContent = ativos.length;
+        document.getElementById('stat-receita').textContent   = formatarMoeda(receita);
+
+        // Mostra os próximos 5 agendamentos de hoje
+        const proximos = deHoje.slice(0, 5);
+        const tbody    = document.getElementById('tabela-dashboard');
+
+        if (proximos.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+            <div class="icon">📅</div><p>Nenhum agendamento para hoje.</p>
+          </div></td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = proximos.map(a => `
+          <tr>
+            <td>${a.nomeCliente || '—'}</td>
+            <td>${a.barbeiroNome || '—'}</td>
+            <td>${formatarData(a.data)}</td>
+            <td>${a.hora || '—'}</td>
+            <td style="font-size:0.8rem;color:var(--cor-texto-suave)">${a.descricaoServicos || 'Corte de Cabelo'}</td>
+            <td>${formatarMoeda(a.valorTotal)}</td>
+            <td>${badgeStatus(a.status)}</td>
+          </tr>
+        `).join('');
+
+      } catch (e) {
+        toast('Erro ao carregar dados. Verifique se o backend está rodando.', 'erro');
+      }
+    }
+
+    carregarDashboard();
+  </script>
+</body>
+</html>
