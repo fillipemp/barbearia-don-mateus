@@ -1,4 +1,4 @@
-# Barbearia Don Mateus, Sistema de Gestao
+# Barbearia Don Mateus - Sistema de Gestão de Barbeiros e Agendamentos
 
 Sistema web completo para gerenciar barbeiros e agendamentos, desenvolvido com Node.js, Firebase Firestore, HTML, CSS e JavaScript. Projeto da disciplina de Padroes de Projeto, Turma 5A, Engenharia de Software.
 
