@@ -9,12 +9,9 @@
 </head>
 <body>
 
-  <!-- Botão de abrir menu (visível só no celular) -->
   <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
-  <!-- Fundo escuro que aparece atrás do menu aberto no mobile -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- ── Barra lateral de navegação (sidebar) ── -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <h1>✂ Don Mateus</h1>
@@ -27,14 +24,12 @@
     </nav>
   </aside>
 
-  <!-- ── Conteúdo principal ── -->
   <main class="main">
     <div class="page-header">
       <h2>Dashboard</h2>
       <p>Visão geral da barbearia</p>
     </div>
 
-    <!-- Cards de resumo — carregados via JS -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="label">Agendamentos Hoje</div>
@@ -58,7 +53,6 @@
       </div>
     </div>
 
-    <!-- Tabela: visível no desktop -->
     <div class="table-card">
       <div class="table-card-header">
         <h3>Próximos Agendamentos de Hoje</h3>
@@ -69,12 +63,8 @@
         <table>
           <thead>
             <tr>
-              <th>Cliente</th>
-              <th>Barbeiro</th>
-              <th>Hora</th>
-              <th>Serviços</th>
-              <th>Valor</th>
-              <th>Status</th>
+              <th>Cliente</th><th>Barbeiro</th><th>Hora</th>
+              <th>Serviços</th><th>Valor</th><th>Status</th>
             </tr>
           </thead>
           <tbody id="tabela-dashboard">
@@ -83,57 +73,46 @@
         </table>
       </div>
 
-      <!-- Cards: visíveis só no celular (mesmos dados, outro layout) -->
       <div class="card-lista" id="cards-dashboard"></div>
     </div>
   </main>
 
-  <!-- Container onde os toasts de notificação aparecem -->
   <div class="toast-container" id="toast-container"></div>
 
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/utils.js"></script>
   <script>
-    // Carrega todos os dados necessários para o dashboard
     async function carregarDashboard() {
       try {
-        // Busca agendamentos e barbeiros em paralelo (mais rápido)
         const [agendamentos, barbeiros] = await Promise.all([
           api.listarAgendamentos(),
           api.listarBarbeiros()
         ]);
 
-        // Filtra agendamentos de hoje pela data no formato YYYY-MM-DD
         const hoje       = new Date().toISOString().split('T')[0];
         const deHoje     = agendamentos.filter(a => a.data === hoje);
         const concluidos = deHoje.filter(a => a.status === 'concluido');
         const receita    = concluidos.reduce((soma, a) => soma + Number(a.valorTotal || 0), 0);
         const ativos     = barbeiros.filter(b => b.status === 'ativo');
 
-        // Preenche os cards de resumo
         document.getElementById('stat-hoje').textContent      = deHoje.length;
         document.getElementById('stat-total').textContent     = agendamentos.length;
         document.getElementById('stat-barbeiros').textContent = ativos.length;
         document.getElementById('stat-receita').textContent   = formatarMoeda(receita);
 
-        // Pega os 5 próximos do dia (ou todos se tiver menos)
         const proximos = deHoje.slice(0, 5);
         renderizarTabela(proximos);
         renderizarCards(proximos);
-
       } catch (e) {
         toast('Erro ao carregar dados. Verifique se o backend está rodando.', 'erro');
       }
     }
 
-    // Renderiza a tabela no formato desktop
     function renderizarTabela(lista) {
       const tbody = document.getElementById('tabela-dashboard');
       if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
-          <div class="icon">📅</div><p>Nenhum agendamento para hoje.</p>
-        </div></td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">📅</div><p>Nenhum agendamento para hoje.</p></div></td></tr>';
         return;
       }
       tbody.innerHTML = lista.map(a => `
@@ -141,22 +120,17 @@
           <td><strong>${a.nomeCliente || '—'}</strong></td>
           <td>${a.barbeiroNome || '—'}</td>
           <td>${a.hora || '—'}</td>
-          <td style="font-size:0.8rem;color:var(--cor-texto-suave);max-width:200px">
-            ${a.descricaoServicos || 'Corte de Cabelo'}
-          </td>
+          <td style="font-size:0.8rem;color:var(--cor-texto-suave)">${a.descricaoServicos || 'Corte de Cabelo'}</td>
           <td style="font-weight:600;color:var(--cor-dourado)">${formatarMoeda(a.valorTotal)}</td>
           <td>${badgeStatus(a.status)}</td>
         </tr>
       `).join('');
     }
 
-    // Renderiza os cards no formato mobile (mesmos dados, layout em card)
     function renderizarCards(lista) {
       const container = document.getElementById('cards-dashboard');
       if (lista.length === 0) {
-        container.innerHTML = `<div class="empty-state">
-          <div class="icon">📅</div><p>Nenhum agendamento para hoje.</p>
-        </div>`;
+        container.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>Nenhum agendamento para hoje.</p></div>';
         return;
       }
       container.innerHTML = lista.map(a => `
@@ -168,14 +142,8 @@
             </div>
             ${badgeStatus(a.status)}
           </div>
-          <div class="card-item-linha">
-            <span>Serviços</span>
-            <span>${a.descricaoServicos || 'Corte de Cabelo'}</span>
-          </div>
-          <div class="card-item-linha">
-            <span>Valor total</span>
-            <span class="card-item-valor">${formatarMoeda(a.valorTotal)}</span>
-          </div>
+          <div class="card-item-linha"><span>Serviços</span><span>${a.descricaoServicos || 'Corte de Cabelo'}</span></div>
+          <div class="card-item-linha"><span>Valor total</span><span class="card-item-valor">${formatarMoeda(a.valorTotal)}</span></div>
         </div>
       `).join('');
     }

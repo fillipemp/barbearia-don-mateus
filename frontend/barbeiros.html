@@ -36,18 +36,12 @@
         <button class="btn btn-primary" onclick="abrirModalNovo()">+ Novo Barbeiro</button>
       </div>
 
-      <!-- Tabela desktop -->
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>Contato</th>
-              <th>Especialidade</th>
-              <th>Horário</th>
-              <th>Salário</th>
-              <th>Status</th>
-              <th>Ações</th>
+              <th>Nome</th><th>Contato</th><th>Especialidade</th>
+              <th>Horário</th><th>Salário</th><th>Status</th><th>Ações</th>
             </tr>
           </thead>
           <tbody id="tabela-barbeiros">
@@ -56,12 +50,11 @@
         </table>
       </div>
 
-      <!-- Cards mobile -->
       <div class="card-lista" id="cards-barbeiros"></div>
     </div>
   </main>
 
-  <!-- ── Modal: Inserir / Editar Barbeiro ── -->
+  <!-- Modal: Inserir / Editar Barbeiro -->
   <div class="modal-overlay" id="modal-barbeiro">
     <div class="modal">
       <div class="modal-header">
@@ -69,7 +62,6 @@
         <button class="modal-close" onclick="fecharModal('modal-barbeiro')">✕</button>
       </div>
       <div class="modal-body">
-        <!-- id guardado aqui invisível quando for editar -->
         <input type="hidden" id="campo-id" />
         <input type="hidden" id="campo-enderecoId" />
 
@@ -141,11 +133,7 @@
           </select>
         </div>
 
-        <!--
-          Seção de endereço — demonstra o RELACIONAMENTO 1:1 do trabalho.
-          Cada barbeiro tem um único endereço cadastrado separadamente.
-          O InserirBarbeiroCommand cria o Endereço primeiro, depois o Barbeiro.
-        -->
+        <!-- Endereço — relacionamento 1:1 -->
         <div class="form-divider">Endereço — Relacionamento 1:1</div>
 
         <div class="form-row">
@@ -177,8 +165,7 @@
           </div>
           <div class="form-group">
             <label>Estado</label>
-            <input type="text" id="campo-estado" placeholder="SP" maxlength="2"
-                   style="text-transform:uppercase" />
+            <input type="text" id="campo-estado" placeholder="SP" maxlength="2" style="text-transform:uppercase" />
           </div>
         </div>
       </div>
@@ -197,7 +184,6 @@
   <script>
     let barbeiros = [];
 
-    // Busca todos os barbeiros e atualiza a tela
     async function carregar() {
       try {
         barbeiros = await api.listarBarbeiros();
@@ -208,28 +194,21 @@
       }
     }
 
-    // Tabela para desktop
     function renderizarTabela() {
       const tbody = document.getElementById('tabela-barbeiros');
       if (barbeiros.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
-          <div class="icon">👤</div><p>Nenhum barbeiro cadastrado ainda.</p>
-        </div></td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">👤</div><p>Nenhum barbeiro cadastrado ainda.</p></div></td></tr>';
         return;
       }
       tbody.innerHTML = barbeiros.map(b => `
         <tr>
-          <td>
-            <strong>${b.nome || '—'}</strong><br>
-            <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${b.cpf || ''}</span>
-          </td>
-          <td>
-            ${b.telefone || '—'}<br>
-            <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${b.email || ''}</span>
-          </td>
+          <td><strong>${b.nome || '—'}</strong><br>
+            <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${b.cpf || ''}</span></td>
+          <td>${b.telefone || '—'}<br>
+            <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${b.email || ''}</span></td>
           <td>${b.especialidade || '—'}</td>
           <td style="font-size:0.8rem">${b.horarioInicio || '—'} às ${b.horarioFim || '—'}<br>
-              <span style="color:var(--cor-texto-suave);font-size:0.72rem">${b.diasTrabalho || 'seg-sex'}</span></td>
+            <span style="color:var(--cor-texto-suave);font-size:0.72rem">${b.diasTrabalho || 'seg-sex'}</span></td>
           <td style="color:var(--cor-dourado);font-weight:600">${formatarMoeda(b.salario)}</td>
           <td>${badgeStatus(b.status)}</td>
           <td>
@@ -242,13 +221,10 @@
       `).join('');
     }
 
-    // Cards para mobile
     function renderizarCards() {
       const container = document.getElementById('cards-barbeiros');
       if (barbeiros.length === 0) {
-        container.innerHTML = `<div class="empty-state">
-          <div class="icon">👤</div><p>Nenhum barbeiro cadastrado ainda.</p>
-        </div>`;
+        container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>Nenhum barbeiro cadastrado ainda.</p></div>';
         return;
       }
       container.innerHTML = barbeiros.map(b => `
@@ -262,10 +238,7 @@
           </div>
           <div class="card-item-linha"><span>Telefone</span><span>${b.telefone || '—'}</span></div>
           <div class="card-item-linha"><span>Horário</span><span>${b.horarioInicio || '—'} às ${b.horarioFim || '—'} (${b.diasTrabalho || 'seg-sex'})</span></div>
-          <div class="card-item-linha">
-            <span>Salário</span>
-            <span class="card-item-valor">${formatarMoeda(b.salario)}</span>
-          </div>
+          <div class="card-item-linha"><span>Salário</span><span class="card-item-valor">${formatarMoeda(b.salario)}</span></div>
           <div class="card-item-acoes">
             <button class="btn btn-ghost btn-sm"  onclick="abrirEditar('${b.id}')">✏ Editar</button>
             <button class="btn btn-danger btn-sm" onclick="deletar('${b.id}')">🗑 Excluir</button>
@@ -274,14 +247,12 @@
       `).join('');
     }
 
-    // Abre o modal em branco para novo cadastro
     function abrirModalNovo() {
       document.getElementById('modal-titulo').textContent = 'Novo Barbeiro';
-      const campos = ['id','enderecoId','nome','cpf','telefone','email','especialidade',
-                      'dataAdmissao','salario','horarioInicio','horarioFim',
-                      'logradouro','numero','bairro','cep','cidade','estado'];
-      campos.forEach(c => {
-        const el = document.getElementById(`campo-${c}`);
+      ['id','enderecoId','nome','cpf','telefone','email','especialidade',
+       'dataAdmissao','salario','horarioInicio','horarioFim',
+       'logradouro','numero','bairro','cep','cidade','estado'].forEach(c => {
+        const el = document.getElementById('campo-' + c);
         if (el) el.value = '';
       });
       document.getElementById('campo-status').value       = 'ativo';
@@ -289,37 +260,33 @@
       abrirModal('modal-barbeiro');
     }
 
-    // Abre o modal preenchido com os dados do barbeiro selecionado
     function abrirEditar(id) {
       const b = barbeiros.find(x => x.id === id);
       if (!b) return;
       const end = b.endereco || {};
-
-      document.getElementById('modal-titulo').textContent   = 'Editar Barbeiro';
-      document.getElementById('campo-id').value             = b.id;
-      document.getElementById('campo-enderecoId').value     = b.enderecoId || '';
-      document.getElementById('campo-nome').value           = b.nome || '';
-      document.getElementById('campo-cpf').value            = b.cpf || '';
-      document.getElementById('campo-telefone').value       = b.telefone || '';
-      document.getElementById('campo-email').value          = b.email || '';
-      document.getElementById('campo-especialidade').value  = b.especialidade || '';
-      document.getElementById('campo-status').value         = b.status || 'ativo';
-      document.getElementById('campo-dataAdmissao').value   = b.dataAdmissao || '';
-      document.getElementById('campo-salario').value        = b.salario || '';
-      document.getElementById('campo-horarioInicio').value   = b.horarioInicio || '';
-      document.getElementById('campo-horarioFim').value      = b.horarioFim || '';
-      document.getElementById('campo-diasTrabalho').value    = b.diasTrabalho || 'seg-sex';
-      // Preenche endereço (relacionamento 1:1)
-      document.getElementById('campo-logradouro').value     = end.logradouro || '';
-      document.getElementById('campo-numero').value         = end.numero || '';
-      document.getElementById('campo-bairro').value         = end.bairro || '';
-      document.getElementById('campo-cep').value            = end.cep || '';
-      document.getElementById('campo-cidade').value         = end.cidade || '';
-      document.getElementById('campo-estado').value         = end.estado || '';
+      document.getElementById('modal-titulo').textContent        = 'Editar Barbeiro';
+      document.getElementById('campo-id').value                  = b.id;
+      document.getElementById('campo-enderecoId').value          = b.enderecoId || '';
+      document.getElementById('campo-nome').value                = b.nome || '';
+      document.getElementById('campo-cpf').value                 = b.cpf || '';
+      document.getElementById('campo-telefone').value            = b.telefone || '';
+      document.getElementById('campo-email').value               = b.email || '';
+      document.getElementById('campo-especialidade').value       = b.especialidade || '';
+      document.getElementById('campo-status').value              = b.status || 'ativo';
+      document.getElementById('campo-dataAdmissao').value        = b.dataAdmissao || '';
+      document.getElementById('campo-salario').value             = b.salario || '';
+      document.getElementById('campo-horarioInicio').value       = b.horarioInicio || '';
+      document.getElementById('campo-horarioFim').value          = b.horarioFim || '';
+      document.getElementById('campo-diasTrabalho').value        = b.diasTrabalho || 'seg-sex';
+      document.getElementById('campo-logradouro').value          = end.logradouro || '';
+      document.getElementById('campo-numero').value              = end.numero || '';
+      document.getElementById('campo-bairro').value              = end.bairro || '';
+      document.getElementById('campo-cep').value                 = end.cep || '';
+      document.getElementById('campo-cidade').value              = end.cidade || '';
+      document.getElementById('campo-estado').value              = end.estado || '';
       abrirModal('modal-barbeiro');
     }
 
-    // Coleta o formulário e envia ao backend (novo ou edição)
     async function salvarBarbeiro() {
       const id         = document.getElementById('campo-id').value;
       const enderecoId = document.getElementById('campo-enderecoId').value;
@@ -336,9 +303,7 @@
         horarioInicio: document.getElementById('campo-horarioInicio').value,
         horarioFim:    document.getElementById('campo-horarioFim').value,
         diasTrabalho:  document.getElementById('campo-diasTrabalho').value,
-        // enderecoId mantém o id existente ao editar (o backend atualiza os dados)
         enderecoId:    enderecoId || undefined,
-        // Objeto endereco é enviado para o backend criar/atualizar o Endereço (rel. 1:1)
         endereco: {
           logradouro: document.getElementById('campo-logradouro').value.trim(),
           numero:     document.getElementById('campo-numero').value.trim(),
@@ -373,7 +338,6 @@
       }
     }
 
-    // Remove o barbeiro após confirmação
     async function deletar(id) {
       if (!confirm('Confirma a exclusão deste barbeiro?')) return;
       try {

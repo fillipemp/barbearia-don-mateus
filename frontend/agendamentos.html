@@ -36,19 +36,12 @@
         <button class="btn btn-primary" onclick="abrirModalNovo()">+ Novo Agendamento</button>
       </div>
 
-      <!-- Tabela — visível no desktop -->
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>Cliente</th>
-              <th>Barbeiro</th>
-              <th>Data</th>
-              <th>Hora</th>
-              <th>Serviços</th>
-              <th>Valor</th>
-              <th>Status</th>
-              <th>Ações</th>
+              <th>Cliente</th><th>Barbeiro</th><th>Data</th><th>Hora</th>
+              <th>Serviços</th><th>Valor</th><th>Status</th><th>Ações</th>
             </tr>
           </thead>
           <tbody id="tabela-agendamentos">
@@ -56,13 +49,11 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Cards — visíveis no celular -->
       <div class="card-lista" id="cards-agendamentos"></div>
     </div>
   </main>
 
-  <!-- ── Modal: Inserir / Editar Agendamento ── -->
+  <!-- Modal: Inserir / Editar Agendamento -->
   <div class="modal-overlay" id="modal-agendamento">
     <div class="modal">
       <div class="modal-header">
@@ -70,7 +61,6 @@
         <button class="modal-close" onclick="fecharModal('modal-agendamento')">✕</button>
       </div>
       <div class="modal-body">
-        <!-- Campo oculto que guarda o id quando estamos editando -->
         <input type="hidden" id="campo-id" />
 
         <div class="form-row">
@@ -102,7 +92,6 @@
           </div>
           <div class="form-group">
             <label>Barbeiro *</label>
-            <!-- Populado dinamicamente com os barbeiros ativos -->
             <select id="campo-barbeiroId" onchange="atualizarHorarios()">
               <option value="">Selecione o barbeiro primeiro...</option>
             </select>
@@ -112,7 +101,6 @@
         <div class="form-row">
           <div class="form-group">
             <label>Hora *</label>
-            <!-- Populado automaticamente com base no horário do barbeiro -->
             <select id="campo-hora">
               <option value="">Selecione o barbeiro acima</option>
             </select>
@@ -133,8 +121,7 @@
           <textarea id="campo-observacao" rows="2" placeholder="Alguma preferência ou detalhe..."></textarea>
         </div>
 
-        <!-- Campos ocultos que preservam o valor já calculado pelo Decorator -->
-        <!-- Sem eles, editar o status sobrescreveria o valorTotal com R$ 30 fixo -->
+        <!-- Campos ocultos que preservam o valor calculado pelo Decorator -->
         <input type="hidden" id="campo-valorBase" value="30" />
         <input type="hidden" id="campo-valorTotal" value="30" />
         <input type="hidden" id="campo-descricaoServicos" value="Corte de Cabelo" />
@@ -146,12 +133,7 @@
     </div>
   </div>
 
-  <!-- ── Modal: Calcular Valor com o Decorator ── -->
-  <!--
-    Este é o coração da automatização com o padrão Decorator.
-    O usuário escolhe os serviços extras e o sistema calcula
-    o valor total encadeando os Decorators no backend.
-  -->
+  <!-- Modal: Calcular Valor com Decorator -->
   <div class="modal-overlay" id="modal-calcular">
     <div class="modal">
       <div class="modal-header">
@@ -166,7 +148,6 @@
 
         <input type="hidden" id="calcular-id" />
 
-        <!-- Cada checkbox representa um ConcreteDecorator -->
         <div class="servicos-grid">
           <label class="servico-check">
             <input type="checkbox" value="barba" />
@@ -186,16 +167,15 @@
           </label>
         </div>
 
-        <!-- Aparece após clicar em "Calcular e Salvar" com o resultado do Decorator -->
         <div class="resultado-calculo" id="resultado-calculo" style="display:none">
           <div class="descricao" id="resultado-descricao"></div>
           <div class="total" id="resultado-total"></div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost"    onclick="fecharModal('modal-calcular')">Fechar</button>
-        <button class="btn btn-ghost"    onclick="previewDecorator()">Calcular</button>
-        <button class="btn btn-primary"  id="btn-salvar-decorator" onclick="aplicarDecorator()" disabled style="opacity:0.5">Salvar</button>
+        <button class="btn btn-ghost"   onclick="fecharModal('modal-calcular')">Fechar</button>
+        <button class="btn btn-ghost"   onclick="previewDecorator()">Calcular</button>
+        <button class="btn btn-primary" id="btn-salvar-decorator" onclick="aplicarDecorator()" disabled style="opacity:0.5">Salvar</button>
       </div>
     </div>
   </div>
@@ -206,11 +186,9 @@
   <script src="js/api.js"></script>
   <script src="js/utils.js"></script>
   <script>
-    // Variáveis em memória — evitam chamadas repetidas ao backend
     let agendamentos = [];
     let barbeiros    = [];
 
-    // Carrega agendamentos e barbeiros em paralelo, depois renderiza
     async function carregar() {
       try {
         [agendamentos, barbeiros] = await Promise.all([
@@ -225,7 +203,6 @@
       }
     }
 
-    // Preenche o select de barbeiros com apenas os que estão ativos
     function popularSelectBarbeiros() {
       const select = document.getElementById('campo-barbeiroId');
       select.innerHTML = '<option value="">Selecione o barbeiro primeiro...</option>';
@@ -236,7 +213,7 @@
         });
     }
 
-    // Gera os horários disponíveis de 1 em 1 hora com base no barbeiro selecionado
+    // Popula o select de horários com slots de 1h dentro do expediente do barbeiro
     function atualizarHorarios(horaAtual) {
       const barbeiroId = document.getElementById('campo-barbeiroId').value;
       const selectHora = document.getElementById('campo-hora');
@@ -248,50 +225,39 @@
 
       const barbeiro = barbeiros.find(b => b.id === barbeiroId);
       if (!barbeiro || !barbeiro.horarioInicio || !barbeiro.horarioFim) {
-        // Barbeiro sem horário cadastrado — libera input livre
         selectHora.innerHTML = '<option value="">Horário não configurado</option>';
         return;
       }
 
-      // Converte "09:00" em minutos para fazer a iteração
-      const [hIni, mIni] = barbeiro.horarioInicio.split(':').map(Number);
-      const [hFim, mFim] = barbeiro.horarioFim.split(':').map(Number);
-      const inicio = hIni * 60 + mIni;
-      const fim    = hFim * 60 + mFim;
+      const [hIni] = barbeiro.horarioInicio.split(':').map(Number);
+      const [hFim] = barbeiro.horarioFim.split(':').map(Number);
+      const inicio = hIni * 60;
+      const fim    = hFim * 60;
 
       selectHora.innerHTML = '<option value="">Escolha um horário</option>';
-
-      // Gera um slot por hora dentro do expediente do barbeiro
       for (let min = inicio; min < fim; min += 60) {
         const hh    = String(Math.floor(min / 60)).padStart(2, '0');
         const mm    = String(min % 60).padStart(2, '0');
-        const valor = `${hh}:${mm}`;
+        const valor = hh + ':' + mm;
         const sel   = horaAtual === valor ? 'selected' : '';
-        selectHora.innerHTML += `<option value="${valor}" ${sel}>${valor}</option>`;
+        selectHora.innerHTML += '<option value="' + valor + '" ' + sel + '>' + valor + '</option>';
       }
     }
 
-    // Renderiza a tabela (formato desktop)
     function renderizarTabela() {
       const tbody = document.getElementById('tabela-agendamentos');
       if (agendamentos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
-          <div class="icon">📅</div><p>Nenhum agendamento cadastrado ainda.</p>
-        </div></td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="icon">📅</div><p>Nenhum agendamento cadastrado.</p></div></td></tr>';
         return;
       }
       tbody.innerHTML = agendamentos.map(a => `
         <tr>
-          <td>
-            <strong>${a.nomeCliente || '—'}</strong><br>
-            <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${a.telefone || ''}</span>
-          </td>
+          <td><strong>${a.nomeCliente || '—'}</strong><br>
+            <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${a.telefone || ''}</span></td>
           <td>${a.barbeiroNome || '—'}</td>
           <td>${formatarData(a.data)}</td>
           <td>${a.hora || '—'}</td>
-          <td style="font-size:0.8rem;color:var(--cor-texto-suave);max-width:180px">
-            ${a.descricaoServicos || 'Corte de Cabelo'}
-          </td>
+          <td style="font-size:0.8rem;color:var(--cor-texto-suave);max-width:180px">${a.descricaoServicos || 'Corte de Cabelo'}</td>
           <td style="font-weight:600;color:var(--cor-dourado)">${formatarMoeda(a.valorTotal)}</td>
           <td>${badgeStatus(a.status)}</td>
           <td>
@@ -305,13 +271,10 @@
       `).join('');
     }
 
-    // Renderiza os cards (formato mobile)
     function renderizarCards() {
       const container = document.getElementById('cards-agendamentos');
       if (agendamentos.length === 0) {
-        container.innerHTML = `<div class="empty-state">
-          <div class="icon">📅</div><p>Nenhum agendamento cadastrado ainda.</p>
-        </div>`;
+        container.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>Nenhum agendamento cadastrado.</p></div>';
         return;
       }
       container.innerHTML = agendamentos.map(a => `
@@ -339,48 +302,44 @@
       `).join('');
     }
 
-    // Abre o modal em modo "Novo Agendamento" com os campos limpos
     function abrirModalNovo() {
-      document.getElementById('modal-titulo').textContent          = 'Novo Agendamento';
-      document.getElementById('campo-id').value                    = '';
-      document.getElementById('campo-nomeCliente').value           = '';
-      document.getElementById('campo-cpf').value                   = '';
-      document.getElementById('campo-telefone').value              = '';
-      document.getElementById('campo-email').value                 = '';
-      document.getElementById('campo-data').value                  = new Date().toISOString().split('T')[0];
-      document.getElementById('campo-barbeiroId').value            = '';
-      document.getElementById('campo-status').value                = 'agendado';
-      document.getElementById('campo-observacao').value            = '';
-      document.getElementById('campo-valorBase').value             = '30';
-      document.getElementById('campo-valorTotal').value            = '30';
-      document.getElementById('campo-descricaoServicos').value     = 'Corte de Cabelo';
-      atualizarHorarios(); // limpa o select de horários
+      document.getElementById('modal-titulo').textContent      = 'Novo Agendamento';
+      document.getElementById('campo-id').value               = '';
+      document.getElementById('campo-nomeCliente').value      = '';
+      document.getElementById('campo-cpf').value              = '';
+      document.getElementById('campo-telefone').value         = '';
+      document.getElementById('campo-email').value            = '';
+      document.getElementById('campo-data').value             = new Date().toISOString().split('T')[0];
+      document.getElementById('campo-barbeiroId').value       = '';
+      document.getElementById('campo-status').value           = 'agendado';
+      document.getElementById('campo-observacao').value       = '';
+      document.getElementById('campo-valorBase').value        = '30';
+      document.getElementById('campo-valorTotal').value       = '30';
+      document.getElementById('campo-descricaoServicos').value = 'Corte de Cabelo';
+      atualizarHorarios();
       abrirModal('modal-agendamento');
     }
 
-    // Abre o modal em modo "Editar" com os dados do agendamento já preenchidos
     function abrirEditar(id) {
       const a = agendamentos.find(x => x.id === id);
       if (!a) return;
-      document.getElementById('modal-titulo').textContent          = 'Editar Agendamento';
-      document.getElementById('campo-id').value                    = a.id;
-      document.getElementById('campo-nomeCliente').value           = a.nomeCliente || '';
-      document.getElementById('campo-cpf').value                   = a.cpf || '';
-      document.getElementById('campo-telefone').value              = a.telefone || '';
-      document.getElementById('campo-email').value                 = a.email || '';
-      document.getElementById('campo-data').value                  = a.data || '';
-      document.getElementById('campo-barbeiroId').value            = a.barbeiroId || '';
-      document.getElementById('campo-status').value                = a.status || 'agendado';
-      document.getElementById('campo-observacao').value            = a.observacao || '';
-      document.getElementById('campo-valorBase').value             = a.valorBase || '30';
-      document.getElementById('campo-valorTotal').value            = a.valorTotal || '30';
-      document.getElementById('campo-descricaoServicos').value     = a.descricaoServicos || 'Corte de Cabelo';
-      // Popula os horários do barbeiro e pré-seleciona o horário já salvo
+      document.getElementById('modal-titulo').textContent      = 'Editar Agendamento';
+      document.getElementById('campo-id').value               = a.id;
+      document.getElementById('campo-nomeCliente').value      = a.nomeCliente || '';
+      document.getElementById('campo-cpf').value              = a.cpf || '';
+      document.getElementById('campo-telefone').value         = a.telefone || '';
+      document.getElementById('campo-email').value            = a.email || '';
+      document.getElementById('campo-data').value             = a.data || '';
+      document.getElementById('campo-barbeiroId').value       = a.barbeiroId || '';
+      document.getElementById('campo-status').value           = a.status || 'agendado';
+      document.getElementById('campo-observacao').value       = a.observacao || '';
+      document.getElementById('campo-valorBase').value        = a.valorBase || '30';
+      document.getElementById('campo-valorTotal').value       = a.valorTotal || '30';
+      document.getElementById('campo-descricaoServicos').value = a.descricaoServicos || 'Corte de Cabelo';
       atualizarHorarios(a.hora || '');
       abrirModal('modal-agendamento');
     }
 
-    // Coleta os dados do formulário e envia para o backend (inserir ou atualizar)
     async function salvarAgendamento() {
       const id    = document.getElementById('campo-id').value;
       const dados = {
@@ -393,14 +352,11 @@
         barbeiroId:        document.getElementById('campo-barbeiroId').value,
         status:            document.getElementById('campo-status').value,
         observacao:        document.getElementById('campo-observacao').value.trim(),
-        // Usa os valores dos campos ocultos — preserva o que o Decorator calculou
-        // Assim mudar o status para "concluido" não zera o valorTotal
         valorBase:         parseFloat(document.getElementById('campo-valorBase').value) || 30,
         valorTotal:        parseFloat(document.getElementById('campo-valorTotal').value) || 30,
         descricaoServicos: document.getElementById('campo-descricaoServicos').value || 'Corte de Cabelo'
       };
 
-      // Validação dos campos obrigatórios
       if (!dados.nomeCliente || !dados.telefone || !dados.data || !dados.hora || !dados.barbeiroId) {
         toast('Preencha todos os campos obrigatórios (*).', 'erro');
         return;
@@ -419,13 +375,12 @@
           toast('Agendamento criado com sucesso!');
         }
         fecharModal('modal-agendamento');
-        carregar(); // Recarrega a lista atualizada
+        carregar();
       } catch (e) {
         toast('Erro ao salvar agendamento.', 'erro');
       }
     }
 
-    // Exclui um agendamento após confirmação do usuário
     async function deletar(id) {
       if (!confirm('Confirma a exclusão deste agendamento?')) return;
       try {
@@ -437,50 +392,43 @@
       }
     }
 
-    // Abre o modal do Decorator, limpando seleções e desabilitando Salvar
     function abrirCalcular(id) {
       document.getElementById('calcular-id').value = id;
       document.getElementById('resultado-calculo').style.display = 'none';
-      document.querySelectorAll('#modal-calcular input[type="checkbox"]')
-        .forEach(cb => cb.checked = false);
-      // Salvar fica bloqueado até o usuário clicar em "Calcular" primeiro
-      const btnSalvar = document.getElementById('btn-salvar-decorator');
-      btnSalvar.disabled = true;
-      btnSalvar.style.opacity = '0.5';
+      document.querySelectorAll('#modal-calcular input[type="checkbox"]').forEach(cb => cb.checked = false);
+      const btn = document.getElementById('btn-salvar-decorator');
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
       abrirModal('modal-calcular');
     }
 
-    // Calcula o valor localmente (sem bater no backend) só para mostrar o preview
-    // Os precos precisam bater com os Decorators do backend
+    // Preços espelham exatamente os Decorators do backend
     const PRECOS = { barba: 20, hidratacao: 25, sobrancelha: 10, tratamentoCapilar: 35 };
     const NOMES  = { barba: 'Barba', hidratacao: 'Hidratação', sobrancelha: 'Sobrancelha', tratamentoCapilar: 'Trat. Capilar' };
 
+    // Preview local — mostra o valor calculado sem salvar no banco ainda
     function previewDecorator() {
       const extras = Array.from(
         document.querySelectorAll('#modal-calcular input[type="checkbox"]:checked')
       ).map(cb => cb.value);
 
-      // Monta a descrição e soma os valores — espelha o que o backend fará com os Decorators
-      let total     = 30; // CorteBase
-      let descricao = 'Corte de Cabelo';
-
-      for (const extra of extras) {
-        total     += PRECOS[extra] || 0;
-        descricao += ' + ' + (NOMES[extra] || extra);
+      let total = 30;
+      let desc  = 'Corte de Cabelo';
+      for (const e of extras) {
+        total += PRECOS[e] || 0;
+        desc  += ' + ' + (NOMES[e] || e);
       }
 
-      // Exibe o resultado do preview
-      document.getElementById('resultado-descricao').textContent = descricao;
+      document.getElementById('resultado-descricao').textContent = desc;
       document.getElementById('resultado-total').textContent     = formatarMoeda(total);
       document.getElementById('resultado-calculo').style.display = 'block';
 
-      // Libera o botão Salvar agora que o usuário viu o resultado
-      const btnSalvar = document.getElementById('btn-salvar-decorator');
-      btnSalvar.disabled = false;
-      btnSalvar.style.opacity = '1';
+      const btn = document.getElementById('btn-salvar-decorator');
+      btn.disabled = false;
+      btn.style.opacity = '1';
     }
 
-    // Envia os extras selecionados ao backend, que aplica o Decorator e retorna o valor final
+    // Salvar — chama o backend, que aplica os Decorators reais e persiste no Firebase
     async function aplicarDecorator() {
       const id     = document.getElementById('calcular-id').value;
       const extras = Array.from(
@@ -488,28 +436,23 @@
       ).map(cb => cb.value);
 
       try {
-        // O backend monta a cadeia: CorteBase → Decorator1 → Decorator2 → ...
         const resultado = await api.calcularValor(id, extras);
 
-        // Mostra o resultado brevemente e fecha o modal automaticamente
         document.getElementById('resultado-descricao').textContent = resultado.descricaoServicos;
         document.getElementById('resultado-total').textContent     = formatarMoeda(resultado.valorTotal);
         document.getElementById('resultado-calculo').style.display = 'block';
 
-        toast('Valor calculado e salvo: ' + formatarMoeda(resultado.valorTotal));
+        toast('Valor salvo: ' + formatarMoeda(resultado.valorTotal));
 
-        // Fecha o modal após 1,5s para o usuário ver o resultado
         setTimeout(() => {
           fecharModal('modal-calcular');
-          carregar(); // Atualiza a tabela com o novo valor
+          carregar();
         }, 1500);
-
       } catch (e) {
-        toast('Erro ao calcular valor.', 'erro');
+        toast('Erro ao salvar valor.', 'erro');
       }
     }
 
-    // Inicialização: aplica máscaras nos campos e carrega os dados
     aplicarMascaras({ cpf: 'campo-cpf', telefone: 'campo-telefone' });
     carregar();
   </script>
