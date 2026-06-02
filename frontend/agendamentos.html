@@ -101,17 +101,20 @@
             <input type="date" id="campo-data" />
           </div>
           <div class="form-group">
-            <label>Hora *</label>
-            <input type="time" id="campo-hora" />
+            <label>Barbeiro *</label>
+            <!-- Populado dinamicamente com os barbeiros ativos -->
+            <select id="campo-barbeiroId" onchange="atualizarHorarios()">
+              <option value="">Selecione o barbeiro primeiro...</option>
+            </select>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Barbeiro *</label>
-            <!-- Populado dinamicamente com os barbeiros ativos -->
-            <select id="campo-barbeiroId">
-              <option value="">Selecione...</option>
+            <label>Hora *</label>
+            <!-- Populado automaticamente com base no horário do barbeiro -->
+            <select id="campo-hora">
+              <option value="">Selecione o barbeiro acima</option>
             </select>
           </div>
           <div class="form-group">
@@ -152,7 +155,7 @@
   <div class="modal-overlay" id="modal-calcular">
     <div class="modal">
       <div class="modal-header">
-        <h3>✂ Calcular Valor — Decorator</h3>
+        <h3>✂ Calcular Valor com Decorator</h3>
         <button class="modal-close" onclick="fecharModal('modal-calcular')">✕</button>
       </div>
       <div class="modal-body">
@@ -190,8 +193,9 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="fecharModal('modal-calcular')">Fechar</button>
-        <button class="btn btn-primary" onclick="aplicarDecorator()">Calcular e Salvar</button>
+        <button class="btn btn-ghost"    onclick="fecharModal('modal-calcular')">Fechar</button>
+        <button class="btn btn-ghost"    onclick="previewDecorator()">Calcular</button>
+        <button class="btn btn-primary"  id="btn-salvar-decorator" onclick="aplicarDecorator()" disabled style="opacity:0.5">Salvar</button>
       </div>
     </div>
   </div>
@@ -224,12 +228,47 @@
     // Preenche o select de barbeiros com apenas os que estão ativos
     function popularSelectBarbeiros() {
       const select = document.getElementById('campo-barbeiroId');
-      select.innerHTML = '<option value="">Selecione...</option>';
+      select.innerHTML = '<option value="">Selecione o barbeiro primeiro...</option>';
       barbeiros
         .filter(b => b.status === 'ativo')
         .forEach(b => {
           select.innerHTML += `<option value="${b.id}">${b.nome}</option>`;
         });
+    }
+
+    // Gera os horários disponíveis de 1 em 1 hora com base no barbeiro selecionado
+    function atualizarHorarios(horaAtual) {
+      const barbeiroId = document.getElementById('campo-barbeiroId').value;
+      const selectHora = document.getElementById('campo-hora');
+
+      if (!barbeiroId) {
+        selectHora.innerHTML = '<option value="">Selecione o barbeiro acima</option>';
+        return;
+      }
+
+      const barbeiro = barbeiros.find(b => b.id === barbeiroId);
+      if (!barbeiro || !barbeiro.horarioInicio || !barbeiro.horarioFim) {
+        // Barbeiro sem horário cadastrado — libera input livre
+        selectHora.innerHTML = '<option value="">Horário não configurado</option>';
+        return;
+      }
+
+      // Converte "09:00" em minutos para fazer a iteração
+      const [hIni, mIni] = barbeiro.horarioInicio.split(':').map(Number);
+      const [hFim, mFim] = barbeiro.horarioFim.split(':').map(Number);
+      const inicio = hIni * 60 + mIni;
+      const fim    = hFim * 60 + mFim;
+
+      selectHora.innerHTML = '<option value="">Escolha um horário</option>';
+
+      // Gera um slot por hora dentro do expediente do barbeiro
+      for (let min = inicio; min < fim; min += 60) {
+        const hh    = String(Math.floor(min / 60)).padStart(2, '0');
+        const mm    = String(min % 60).padStart(2, '0');
+        const valor = `${hh}:${mm}`;
+        const sel   = horaAtual === valor ? 'selected' : '';
+        selectHora.innerHTML += `<option value="${valor}" ${sel}>${valor}</option>`;
+      }
     }
 
     // Renderiza a tabela (formato desktop)
@@ -309,14 +348,13 @@
       document.getElementById('campo-telefone').value              = '';
       document.getElementById('campo-email').value                 = '';
       document.getElementById('campo-data').value                  = new Date().toISOString().split('T')[0];
-      document.getElementById('campo-hora').value                  = '';
       document.getElementById('campo-barbeiroId').value            = '';
       document.getElementById('campo-status').value                = 'agendado';
       document.getElementById('campo-observacao').value            = '';
-      // Valores iniciais padrão — serão atualizados pelo Decorator depois
       document.getElementById('campo-valorBase').value             = '30';
       document.getElementById('campo-valorTotal').value            = '30';
       document.getElementById('campo-descricaoServicos').value     = 'Corte de Cabelo';
+      atualizarHorarios(); // limpa o select de horários
       abrirModal('modal-agendamento');
     }
 
@@ -331,14 +369,14 @@
       document.getElementById('campo-telefone').value              = a.telefone || '';
       document.getElementById('campo-email').value                 = a.email || '';
       document.getElementById('campo-data').value                  = a.data || '';
-      document.getElementById('campo-hora').value                  = a.hora || '';
       document.getElementById('campo-barbeiroId').value            = a.barbeiroId || '';
       document.getElementById('campo-status').value                = a.status || 'agendado';
       document.getElementById('campo-observacao').value            = a.observacao || '';
-      // Preserva os valores já calculados pelo Decorator — evita sobrescrever com R$ 30 fixo
       document.getElementById('campo-valorBase').value             = a.valorBase || '30';
       document.getElementById('campo-valorTotal').value            = a.valorTotal || '30';
       document.getElementById('campo-descricaoServicos').value     = a.descricaoServicos || 'Corte de Cabelo';
+      // Popula os horários do barbeiro e pré-seleciona o horário já salvo
+      atualizarHorarios(a.hora || '');
       abrirModal('modal-agendamento');
     }
 
@@ -399,13 +437,47 @@
       }
     }
 
-    // Abre o modal do Decorator, limpando seleções anteriores
+    // Abre o modal do Decorator, limpando seleções e desabilitando Salvar
     function abrirCalcular(id) {
       document.getElementById('calcular-id').value = id;
       document.getElementById('resultado-calculo').style.display = 'none';
       document.querySelectorAll('#modal-calcular input[type="checkbox"]')
         .forEach(cb => cb.checked = false);
+      // Salvar fica bloqueado até o usuário clicar em "Calcular" primeiro
+      const btnSalvar = document.getElementById('btn-salvar-decorator');
+      btnSalvar.disabled = true;
+      btnSalvar.style.opacity = '0.5';
       abrirModal('modal-calcular');
+    }
+
+    // Calcula o valor localmente (sem bater no backend) só para mostrar o preview
+    // Os precos precisam bater com os Decorators do backend
+    const PRECOS = { barba: 20, hidratacao: 25, sobrancelha: 10, tratamentoCapilar: 35 };
+    const NOMES  = { barba: 'Barba', hidratacao: 'Hidratação', sobrancelha: 'Sobrancelha', tratamentoCapilar: 'Trat. Capilar' };
+
+    function previewDecorator() {
+      const extras = Array.from(
+        document.querySelectorAll('#modal-calcular input[type="checkbox"]:checked')
+      ).map(cb => cb.value);
+
+      // Monta a descrição e soma os valores — espelha o que o backend fará com os Decorators
+      let total     = 30; // CorteBase
+      let descricao = 'Corte de Cabelo';
+
+      for (const extra of extras) {
+        total     += PRECOS[extra] || 0;
+        descricao += ' + ' + (NOMES[extra] || extra);
+      }
+
+      // Exibe o resultado do preview
+      document.getElementById('resultado-descricao').textContent = descricao;
+      document.getElementById('resultado-total').textContent     = formatarMoeda(total);
+      document.getElementById('resultado-calculo').style.display = 'block';
+
+      // Libera o botão Salvar agora que o usuário viu o resultado
+      const btnSalvar = document.getElementById('btn-salvar-decorator');
+      btnSalvar.disabled = false;
+      btnSalvar.style.opacity = '1';
     }
 
     // Envia os extras selecionados ao backend, que aplica o Decorator e retorna o valor final

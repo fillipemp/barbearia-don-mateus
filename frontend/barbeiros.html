@@ -131,6 +131,16 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Dias de Trabalho</label>
+          <select id="campo-diasTrabalho">
+            <option value="seg-sex">Segunda a Sexta</option>
+            <option value="seg-sab">Segunda a Sábado</option>
+            <option value="seg-dom">Segunda a Domingo</option>
+            <option value="ter-sab">Terça a Sábado</option>
+          </select>
+        </div>
+
         <!--
           Seção de endereço — demonstra o RELACIONAMENTO 1:1 do trabalho.
           Cada barbeiro tem um único endereço cadastrado separadamente.
@@ -218,7 +228,8 @@
             <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${b.email || ''}</span>
           </td>
           <td>${b.especialidade || '—'}</td>
-          <td style="font-size:0.8rem">${b.horarioInicio || '—'} às ${b.horarioFim || '—'}</td>
+          <td style="font-size:0.8rem">${b.horarioInicio || '—'} às ${b.horarioFim || '—'}<br>
+              <span style="color:var(--cor-texto-suave);font-size:0.72rem">${b.diasTrabalho || 'seg-sex'}</span></td>
           <td style="color:var(--cor-dourado);font-weight:600">${formatarMoeda(b.salario)}</td>
           <td>${badgeStatus(b.status)}</td>
           <td>
@@ -250,7 +261,7 @@
             ${badgeStatus(b.status)}
           </div>
           <div class="card-item-linha"><span>Telefone</span><span>${b.telefone || '—'}</span></div>
-          <div class="card-item-linha"><span>Horário</span><span>${b.horarioInicio || '—'} às ${b.horarioFim || '—'}</span></div>
+          <div class="card-item-linha"><span>Horário</span><span>${b.horarioInicio || '—'} às ${b.horarioFim || '—'} (${b.diasTrabalho || 'seg-sex'})</span></div>
           <div class="card-item-linha">
             <span>Salário</span>
             <span class="card-item-valor">${formatarMoeda(b.salario)}</span>
@@ -273,7 +284,8 @@
         const el = document.getElementById(`campo-${c}`);
         if (el) el.value = '';
       });
-      document.getElementById('campo-status').value = 'ativo';
+      document.getElementById('campo-status').value       = 'ativo';
+      document.getElementById('campo-diasTrabalho').value = 'seg-sex';
       abrirModal('modal-barbeiro');
     }
 
@@ -294,8 +306,9 @@
       document.getElementById('campo-status').value         = b.status || 'ativo';
       document.getElementById('campo-dataAdmissao').value   = b.dataAdmissao || '';
       document.getElementById('campo-salario').value        = b.salario || '';
-      document.getElementById('campo-horarioInicio').value  = b.horarioInicio || '';
-      document.getElementById('campo-horarioFim').value     = b.horarioFim || '';
+      document.getElementById('campo-horarioInicio').value   = b.horarioInicio || '';
+      document.getElementById('campo-horarioFim').value      = b.horarioFim || '';
+      document.getElementById('campo-diasTrabalho').value    = b.diasTrabalho || 'seg-sex';
       // Preenche endereço (relacionamento 1:1)
       document.getElementById('campo-logradouro').value     = end.logradouro || '';
       document.getElementById('campo-numero').value         = end.numero || '';
@@ -322,6 +335,7 @@
         salario:       parseFloat(document.getElementById('campo-salario').value) || 0,
         horarioInicio: document.getElementById('campo-horarioInicio').value,
         horarioFim:    document.getElementById('campo-horarioFim').value,
+        diasTrabalho:  document.getElementById('campo-diasTrabalho').value,
         // enderecoId mantém o id existente ao editar (o backend atualiza os dados)
         enderecoId:    enderecoId || undefined,
         // Objeto endereco é enviado para o backend criar/atualizar o Endereço (rel. 1:1)
