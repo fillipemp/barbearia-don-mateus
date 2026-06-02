@@ -1,27 +1,53 @@
-# Sistema de Gestão de Barbearia — Como Rodar
+# Barbearia Don Mateus, Sistema de Gestao
+
+Sistema web completo para gerenciar barbeiros e agendamentos, desenvolvido com Node.js, Firebase Firestore, HTML, CSS e JavaScript. Projeto da disciplina de Padroes de Projeto, Turma 5A, Engenharia de Software.
+
+**Acesse o sistema:** [barbearia-don-mateus.vercel.app](https://barbearia-don-mateus.vercel.app)
+
+---
 
 ## Tecnologias
-- **Backend**: Node.js + Express
-- **Banco de dados**: Firebase Firestore (NoSQL)
-- **Frontend**: HTML, CSS e JavaScript puro
-- **Deploy**: Backend no Render · Frontend no Vercel
+
+- **Backend:** Node.js com Express
+- **Banco de dados:** Firebase Firestore (NoSQL)
+- **Frontend:** HTML, CSS e JavaScript puro
+- **Deploy:** Backend no Render, Frontend no Vercel
 
 ---
 
-## 1. Configurar o Firebase
+## Padroes de Projeto Implementados
+
+| Padrao | Onde esta no codigo |
+|---|---|
+| MVC | `models/`, `routes/` (controller), `frontend/` (view) |
+| DAO | `dao/BarbeiroDAO.js`, `AgendamentoDAO.js`, `EnderecoDAO.js` |
+| Builder | `builder/BarbeiroBuilder.js`, `AgendamentoBuilder.js` |
+| Factory Method | `factory/BarbeiroFactory.js`, `AgendamentoFactory.js` |
+| Command | `commands/` (11 commands, todos implementam ICommand) |
+| **Decorator** | `decorator/` (IServico, CorteBase, ServicoDecorator, 4 decoradores) |
+| DIP, LSP, SRP, OCP | Aplicados via IDao e ICommand em todo o projeto |
+
+---
+
+## Relacionamentos
+
+- **Barbeiro, Endereco (1:1):** cada barbeiro possui um endereco unico cadastrado separadamente
+- **Barbeiro, Agendamentos (1:N):** um barbeiro pode ter muitos agendamentos vinculados
+
+---
+
+## Como Rodar Localmente
+
+### 1. Configurar o Firebase
 
 1. Acesse [console.firebase.google.com](https://console.firebase.google.com)
-2. Crie um novo projeto (ex: `barbearia-pp`)
-3. Vá em **Firestore Database** → Criar banco → Modo de produção → escolha uma região
-4. Vá em **Configurações do Projeto** → **Contas de serviço** → **Gerar nova chave privada**
-5. Renomeie o arquivo baixado para `serviceAccountKey.json`
-6. Coloque o arquivo dentro da pasta `backend/`
+2. Crie um projeto e ative o **Firestore Database** em modo de producao
+3. Va em **Configuracoes do Projeto**, **Contas de servico**, **Gerar nova chave privada**
+4. Renomeie o arquivo para `serviceAccountKey.json` e coloque dentro da pasta `backend/`
 
-> ⚠️ Nunca suba o `serviceAccountKey.json` para o GitHub! Ele já está no `.gitignore`.
+> O arquivo `serviceAccountKey.json` ja esta no `.gitignore` e nao sera enviado ao GitHub.
 
----
-
-## 2. Rodar o backend localmente
+### 2. Rodar o backend
 
 ```bash
 cd backend
@@ -31,85 +57,57 @@ npm run dev
 
 O servidor sobe em `http://localhost:3001`
 
----
+### 3. Abrir o frontend
 
-## 3. Rodar o frontend localmente
-
-Abra o arquivo `frontend/index.html` diretamente no navegador,  
-ou use a extensão **Live Server** do VS Code.
-
-A URL do backend já está configurada como `http://localhost:3001` nas páginas HTML.
+Abra o arquivo `frontend/index.html` no navegador ou use a extensao **Live Server** do VS Code.
 
 ---
 
-## 4. Deploy do Backend no Render (gratuito)
+## Deploy
 
-1. Crie uma conta em [render.com](https://render.com)
-2. Novo → **Web Service** → conecte seu repositório GitHub
-3. Configure:
-   - **Root Directory**: `backend`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-4. Em **Environment** → adicione uma variável de ambiente:
-   - `PORT` = `3001`
-5. Suba o `serviceAccountKey.json` como **Secret File** em `/etc/secrets/serviceAccountKey.json`
-   - Atualize `backend/database/firebase.js` para usar esse caminho em produção:
-     ```js
-     const serviceAccount = require('/etc/secrets/serviceAccountKey.json');
-     ```
-6. Copie a URL do Render (ex: `https://barbearia-api.onrender.com`)
+### Backend no Render
 
----
+1. Crie uma conta em [render.com](https://render.com) e conecte o repositorio GitHub
+2. Novo **Web Service** com as configuracoes:
+   - **Root Directory:** `backend`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+3. Em **Environment Variables**, adicione a variavel `FIREBASE_CREDENTIALS` com o conteudo completo do `serviceAccountKey.json` como texto JSON
 
-## 5. Deploy do Frontend no Vercel (gratuito)
+### Frontend no Vercel
 
-1. Crie uma conta em [vercel.com](https://vercel.com)
-2. Novo projeto → conecte o repositório → configure:
-   - **Root Directory**: `frontend`
-3. Antes do deploy, atualize a URL do backend nas 3 páginas HTML:
-   ```js
-   window.API_URL = 'https://barbearia-api.onrender.com'; // URL do Render
-   ```
-4. Faça o deploy — a Vercel gera uma URL pública automaticamente.
+1. Crie uma conta em [vercel.com](https://vercel.com) e conecte o repositorio
+2. Configure **Root Directory** como `frontend`
+3. Faca o deploy, a Vercel gera a URL automaticamente
 
 ---
 
-## Endpoints da API
+## Endpoints da API REST
 
-| Método | Endpoint                            | Descrição                        |
-|--------|-------------------------------------|----------------------------------|
-| GET    | /agendamentos                       | Listar todos                     |
-| GET    | /agendamentos/:id                   | Buscar por id                    |
-| POST   | /agendamentos                       | Inserir novo                     |
-| PUT    | /agendamentos/:id                   | Atualizar                        |
-| DELETE | /agendamentos/:id                   | Deletar                          |
-| POST   | /agendamentos/:id/calcular-valor    | **Processo Decorator**           |
-| GET    | /barbeiros                          | Listar todos                     |
-| GET    | /barbeiros/:id                      | Buscar por id                    |
-| POST   | /barbeiros                          | Inserir novo (cria endereço)     |
-| PUT    | /barbeiros/:id                      | Atualizar                        |
-| DELETE | /barbeiros/:id                      | Deletar                          |
-
----
-
-## Padrões de Projeto Utilizados
-
-| Padrão        | Onde está                                     |
-|---------------|-----------------------------------------------|
-| MVC           | models/ + routes/ (controller) + frontend/    |
-| DAO           | dao/AgendamentoDAO, BarbeiroDAO, EnderecoDAO  |
-| Builder       | builder/AgendamentoBuilder, BarbeiroBuilder   |
-| Factory Method| factory/AgendamentoFactory, BarbeiroFactory   |
-| Command       | commands/ (11 commands)                       |
-| **Decorator** | decorator/ (IServico → CorteBase → 4 extras)  |
-| DIP (SOLID)   | IDao, ICommand (abstrações)                   |
-| LSP (SOLID)   | Todos os DAOs e Decorators implementam corretamente |
-| OCP (SOLID)   | Novos decoradores sem modificar existentes    |
-| SRP (SOLID)   | Cada arquivo tem uma única responsabilidade   |
+| Metodo | Endpoint | Descricao |
+|---|---|---|
+| GET | /barbeiros | Listar todos os barbeiros |
+| GET | /barbeiros/:id | Buscar barbeiro por id |
+| POST | /barbeiros | Inserir barbeiro (cria endereco automaticamente) |
+| PUT | /barbeiros/:id | Atualizar barbeiro e endereco |
+| DELETE | /barbeiros/:id | Deletar barbeiro |
+| GET | /agendamentos | Listar todos os agendamentos |
+| GET | /agendamentos/:id | Buscar agendamento por id |
+| POST | /agendamentos | Inserir agendamento |
+| PUT | /agendamentos/:id | Atualizar agendamento |
+| DELETE | /agendamentos/:id | Deletar agendamento |
+| POST | /agendamentos/:id/calcular-valor | Calcular valor com o Decorator |
 
 ---
 
-## Relacionamentos
+## Funcionalidade do Decorator
 
-- **Barbeiro → Endereço** (1:1) — um barbeiro tem um endereço
-- **Barbeiro → Agendamentos** (1:N) — um barbeiro atende muitos agendamentos
+O endpoint `POST /agendamentos/:id/calcular-valor` e o processo de negocio automatizado do sistema. Ele recebe os servicos extras escolhidos e encadeia os Decorators para calcular o valor total:
+
+```json
+{
+  "extras": ["barba", "hidratacao", "sobrancelha"]
+}
+```
+
+O backend monta a cadeia: `CorteBase (R$ 30) -> DecoratorBarba (+R$ 20) -> DecoratorHidratacao (+R$ 25) -> DecoratorSobrancelha (+R$ 10)` e retorna o valor total de R$ 85,00 com a descricao completa dos servicos.
