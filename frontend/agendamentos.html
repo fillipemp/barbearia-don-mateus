@@ -6,12 +6,13 @@
   <title>Barbearia Don Mateus | Agendamentos</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23c8a951%22>✂</text></svg>">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23c8a951%22>✂</text></svg>">
 </head>
 <body>
 
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <h1>✂ Don Mateus</h1>
       <p>Barbearia Don Mateus</p>
@@ -21,10 +22,8 @@
       <a href="agendamentos.html" class="nav-item active"><span class="icon">📅</span> Agendamentos</a>
       <a href="barbeiros.html"    class="nav-item"><span class="icon">👤</span> Barbeiros</a>
     </nav>
-
   </aside>
 
-  <!-- ── Conteúdo ── -->
   <main class="main">
     <div class="page-header">
       <h2>Agendamentos</h2>
@@ -36,24 +35,30 @@
         <h3>Lista de Agendamentos</h3>
         <button class="btn btn-primary" onclick="abrirModalNovo()">+ Novo Agendamento</button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Telefone</th>
-            <th>Barbeiro</th>
-            <th>Data</th>
-            <th>Hora</th>
-            <th>Serviços</th>
-            <th>Valor Total</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-agendamentos">
-          <tr><td colspan="9"><div class="empty-state"><p>Carregando...</p></div></td></tr>
-        </tbody>
-      </table>
+
+      <!-- Tabela — visível no desktop -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Barbeiro</th>
+              <th>Data</th>
+              <th>Hora</th>
+              <th>Serviços</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-agendamentos">
+            <tr><td colspan="8"><div class="empty-state"><p>Carregando...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cards — visíveis no celular -->
+      <div class="card-lista" id="cards-agendamentos"></div>
     </div>
   </main>
 
@@ -65,6 +70,7 @@
         <button class="modal-close" onclick="fecharModal('modal-agendamento')">✕</button>
       </div>
       <div class="modal-body">
+        <!-- Campo oculto que guarda o id quando estamos editando -->
         <input type="hidden" id="campo-id" />
 
         <div class="form-row">
@@ -103,6 +109,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>Barbeiro *</label>
+            <!-- Populado dinamicamente com os barbeiros ativos -->
             <select id="campo-barbeiroId">
               <option value="">Selecione...</option>
             </select>
@@ -120,7 +127,7 @@
 
         <div class="form-group">
           <label>Observação</label>
-          <textarea id="campo-observacao" rows="2" placeholder="Alguma preferência ou observação..."></textarea>
+          <textarea id="campo-observacao" rows="2" placeholder="Alguma preferência ou detalhe..."></textarea>
         </div>
       </div>
       <div class="modal-footer">
@@ -130,40 +137,47 @@
     </div>
   </div>
 
-  <!-- ── Modal: Calcular Valor (Decorator) ── -->
+  <!-- ── Modal: Calcular Valor com o Decorator ── -->
+  <!--
+    Este é o coração da automatização com o padrão Decorator.
+    O usuário escolhe os serviços extras e o sistema calcula
+    o valor total encadeando os Decorators no backend.
+  -->
   <div class="modal-overlay" id="modal-calcular">
     <div class="modal">
       <div class="modal-header">
-        <h3>Calcular Valor do Agendamento</h3>
+        <h3>✂ Calcular Valor — Decorator</h3>
         <button class="modal-close" onclick="fecharModal('modal-calcular')">✕</button>
       </div>
       <div class="modal-body">
-        <p style="font-size:0.85rem;color:var(--cor-texto-suave);margin-bottom:16px">
-          Selecione os serviços extras. O Decorator calcula o valor total automaticamente.
+        <p style="font-size:0.85rem;color:var(--cor-texto-suave);margin-bottom:16px;line-height:1.5">
+          Selecione os serviços extras. O padrão <strong>Decorator</strong> combina
+          os serviços e calcula o valor automaticamente, somando cada extra ao serviço base.
         </p>
 
         <input type="hidden" id="calcular-id" />
 
+        <!-- Cada checkbox representa um ConcreteDecorator -->
         <div class="servicos-grid">
           <label class="servico-check">
-            <input type="checkbox" value="barba" /> ✂
-            <div><div class="nome">Barba</div><div class="preco">+ R$ 20,00</div></div>
+            <input type="checkbox" value="barba" />
+            <div><div class="nome">✂ Barba</div><div class="preco">+ R$ 20,00</div></div>
           </label>
           <label class="servico-check">
-            <input type="checkbox" value="hidratacao" /> 💧
-            <div><div class="nome">Hidratação</div><div class="preco">+ R$ 25,00</div></div>
+            <input type="checkbox" value="hidratacao" />
+            <div><div class="nome">💧 Hidratação</div><div class="preco">+ R$ 25,00</div></div>
           </label>
           <label class="servico-check">
-            <input type="checkbox" value="sobrancelha" /> 👁
-            <div><div class="nome">Sobrancelha</div><div class="preco">+ R$ 10,00</div></div>
+            <input type="checkbox" value="sobrancelha" />
+            <div><div class="nome">👁 Sobrancelha</div><div class="preco">+ R$ 10,00</div></div>
           </label>
           <label class="servico-check">
-            <input type="checkbox" value="tratamentoCapilar" /> 🌿
-            <div><div class="nome">Trat. Capilar</div><div class="preco">+ R$ 35,00</div></div>
+            <input type="checkbox" value="tratamentoCapilar" />
+            <div><div class="nome">🌿 Trat. Capilar</div><div class="preco">+ R$ 35,00</div></div>
           </label>
         </div>
 
-        <!-- Resultado do Decorator aparece aqui -->
+        <!-- Aparece após clicar em "Calcular e Salvar" com o resultado do Decorator -->
         <div class="resultado-calculo" id="resultado-calculo" style="display:none">
           <div class="descricao" id="resultado-descricao"></div>
           <div class="total" id="resultado-total"></div>
@@ -176,17 +190,17 @@
     </div>
   </div>
 
-  <!-- Toast container -->
   <div class="toast-container" id="toast-container"></div>
 
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/utils.js"></script>
   <script>
+    // Variáveis em memória — evitam chamadas repetidas ao backend
     let agendamentos = [];
     let barbeiros    = [];
 
-    // ── Carregar dados ────────────────────────────────────────
+    // Carrega agendamentos e barbeiros em paralelo, depois renderiza
     async function carregar() {
       try {
         [agendamentos, barbeiros] = await Promise.all([
@@ -194,12 +208,14 @@
           api.listarBarbeiros()
         ]);
         renderizarTabela();
+        renderizarCards();
         popularSelectBarbeiros();
       } catch (e) {
         toast('Erro ao carregar dados.', 'erro');
       }
     }
 
+    // Preenche o select de barbeiros com apenas os que estão ativos
     function popularSelectBarbeiros() {
       const select = document.getElementById('campo-barbeiroId');
       select.innerHTML = '<option value="">Selecione...</option>';
@@ -210,94 +226,133 @@
         });
     }
 
+    // Renderiza a tabela (formato desktop)
     function renderizarTabela() {
       const tbody = document.getElementById('tabela-agendamentos');
       if (agendamentos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
-          <div class="icon">📅</div><p>Nenhum agendamento cadastrado.</p>
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+          <div class="icon">📅</div><p>Nenhum agendamento cadastrado ainda.</p>
         </div></td></tr>`;
         return;
       }
       tbody.innerHTML = agendamentos.map(a => `
         <tr>
-          <td><strong>${a.nomeCliente || '—'}</strong><br>
-              <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${a.telefone || ''}</span></td>
-          <td>${a.telefone || '—'}</td>
+          <td>
+            <strong>${a.nomeCliente || '—'}</strong><br>
+            <span style="font-size:0.75rem;color:var(--cor-texto-suave)">${a.telefone || ''}</span>
+          </td>
           <td>${a.barbeiroNome || '—'}</td>
           <td>${formatarData(a.data)}</td>
           <td>${a.hora || '—'}</td>
-          <td style="font-size:0.8rem;max-width:180px;color:var(--cor-texto-suave)">${a.descricaoServicos || 'Corte de Cabelo'}</td>
+          <td style="font-size:0.8rem;color:var(--cor-texto-suave);max-width:180px">
+            ${a.descricaoServicos || 'Corte de Cabelo'}
+          </td>
           <td style="font-weight:600;color:var(--cor-dourado)">${formatarMoeda(a.valorTotal)}</td>
           <td>${badgeStatus(a.status)}</td>
           <td>
-            <div style="display:flex;gap:4px">
-              <button class="btn btn-success btn-sm" onclick="abrirCalcular('${a.id}')" title="Calcular Valor (Decorator)">💰</button>
-              <button class="btn btn-ghost btn-sm" onclick="abrirEditar('${a.id}')">✏</button>
-              <button class="btn btn-danger btn-sm" onclick="deletar('${a.id}')">🗑</button>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <button class="btn btn-success btn-sm" onclick="abrirCalcular('${a.id}')" title="Calcular Valor com Decorator">💰</button>
+              <button class="btn btn-ghost btn-sm"   onclick="abrirEditar('${a.id}')">✏</button>
+              <button class="btn btn-danger btn-sm"  onclick="deletar('${a.id}')">🗑</button>
             </div>
           </td>
         </tr>
       `).join('');
     }
 
-    // ── Novo agendamento ─────────────────────────────────────
+    // Renderiza os cards (formato mobile)
+    function renderizarCards() {
+      const container = document.getElementById('cards-agendamentos');
+      if (agendamentos.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+          <div class="icon">📅</div><p>Nenhum agendamento cadastrado ainda.</p>
+        </div>`;
+        return;
+      }
+      container.innerHTML = agendamentos.map(a => `
+        <div class="card-item">
+          <div class="card-item-header">
+            <div>
+              <div class="card-item-titulo">${a.nomeCliente || '—'}</div>
+              <div class="card-item-sub">${a.telefone || ''}</div>
+            </div>
+            ${badgeStatus(a.status)}
+          </div>
+          <div class="card-item-linha"><span>Barbeiro</span><span>${a.barbeiroNome || '—'}</span></div>
+          <div class="card-item-linha"><span>Data/Hora</span><span>${formatarData(a.data)} às ${a.hora || '—'}</span></div>
+          <div class="card-item-linha"><span>Serviços</span><span>${a.descricaoServicos || 'Corte de Cabelo'}</span></div>
+          <div class="card-item-linha">
+            <span>Valor total</span>
+            <span class="card-item-valor">${formatarMoeda(a.valorTotal)}</span>
+          </div>
+          <div class="card-item-acoes">
+            <button class="btn btn-success btn-sm" onclick="abrirCalcular('${a.id}')">💰 Calcular</button>
+            <button class="btn btn-ghost btn-sm"   onclick="abrirEditar('${a.id}')">✏ Editar</button>
+            <button class="btn btn-danger btn-sm"  onclick="deletar('${a.id}')">🗑</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Abre o modal em modo "Novo Agendamento" com os campos limpos
     function abrirModalNovo() {
-      document.getElementById('modal-titulo').textContent = 'Novo Agendamento';
-      document.getElementById('campo-id').value        = '';
-      document.getElementById('campo-nomeCliente').value = '';
-      document.getElementById('campo-cpf').value       = '';
-      document.getElementById('campo-telefone').value  = '';
-      document.getElementById('campo-email').value     = '';
-      document.getElementById('campo-data').value      = new Date().toISOString().split('T')[0];
-      document.getElementById('campo-hora').value      = '';
-      document.getElementById('campo-barbeiroId').value = '';
-      document.getElementById('campo-status').value    = 'agendado';
-      document.getElementById('campo-observacao').value = '';
+      document.getElementById('modal-titulo').textContent     = 'Novo Agendamento';
+      document.getElementById('campo-id').value               = '';
+      document.getElementById('campo-nomeCliente').value      = '';
+      document.getElementById('campo-cpf').value              = '';
+      document.getElementById('campo-telefone').value         = '';
+      document.getElementById('campo-email').value            = '';
+      document.getElementById('campo-data').value             = new Date().toISOString().split('T')[0];
+      document.getElementById('campo-hora').value             = '';
+      document.getElementById('campo-barbeiroId').value       = '';
+      document.getElementById('campo-status').value           = 'agendado';
+      document.getElementById('campo-observacao').value       = '';
       abrirModal('modal-agendamento');
     }
 
-    // ── Editar agendamento ───────────────────────────────────
+    // Abre o modal em modo "Editar" com os dados do agendamento já preenchidos
     function abrirEditar(id) {
       const a = agendamentos.find(x => x.id === id);
       if (!a) return;
-      document.getElementById('modal-titulo').textContent  = 'Editar Agendamento';
-      document.getElementById('campo-id').value            = a.id;
-      document.getElementById('campo-nomeCliente').value  = a.nomeCliente || '';
-      document.getElementById('campo-cpf').value          = a.cpf || '';
-      document.getElementById('campo-telefone').value     = a.telefone || '';
-      document.getElementById('campo-email').value        = a.email || '';
-      document.getElementById('campo-data').value         = a.data || '';
-      document.getElementById('campo-hora').value         = a.hora || '';
-      document.getElementById('campo-barbeiroId').value   = a.barbeiroId || '';
-      document.getElementById('campo-status').value       = a.status || 'agendado';
-      document.getElementById('campo-observacao').value   = a.observacao || '';
+      document.getElementById('modal-titulo').textContent     = 'Editar Agendamento';
+      document.getElementById('campo-id').value               = a.id;
+      document.getElementById('campo-nomeCliente').value      = a.nomeCliente || '';
+      document.getElementById('campo-cpf').value              = a.cpf || '';
+      document.getElementById('campo-telefone').value         = a.telefone || '';
+      document.getElementById('campo-email').value            = a.email || '';
+      document.getElementById('campo-data').value             = a.data || '';
+      document.getElementById('campo-hora').value             = a.hora || '';
+      document.getElementById('campo-barbeiroId').value       = a.barbeiroId || '';
+      document.getElementById('campo-status').value           = a.status || 'agendado';
+      document.getElementById('campo-observacao').value       = a.observacao || '';
       abrirModal('modal-agendamento');
     }
 
-    // ── Salvar (inserir ou atualizar) ────────────────────────
+    // Coleta os dados do formulário e envia para o backend (inserir ou atualizar)
     async function salvarAgendamento() {
-      const id = document.getElementById('campo-id').value;
+      const id    = document.getElementById('campo-id').value;
       const dados = {
-        nomeCliente:  document.getElementById('campo-nomeCliente').value,
-        cpf:          document.getElementById('campo-cpf').value,
-        telefone:     document.getElementById('campo-telefone').value,
-        email:        document.getElementById('campo-email').value,
-        data:         document.getElementById('campo-data').value,
-        hora:         document.getElementById('campo-hora').value,
-        barbeiroId:   document.getElementById('campo-barbeiroId').value,
-        status:       document.getElementById('campo-status').value,
-        observacao:   document.getElementById('campo-observacao').value,
-        valorBase:    30,
-        valorTotal:   30,
+        nomeCliente:       document.getElementById('campo-nomeCliente').value.trim(),
+        cpf:               document.getElementById('campo-cpf').value,
+        telefone:          document.getElementById('campo-telefone').value,
+        email:             document.getElementById('campo-email').value.trim(),
+        data:              document.getElementById('campo-data').value,
+        hora:              document.getElementById('campo-hora').value,
+        barbeiroId:        document.getElementById('campo-barbeiroId').value,
+        status:            document.getElementById('campo-status').value,
+        observacao:        document.getElementById('campo-observacao').value.trim(),
+        valorBase:         30,       // Valor do CorteBase (serviço mínimo)
+        valorTotal:        30,       // Será recalculado pelo Decorator se extras forem adicionados
         descricaoServicos: 'Corte de Cabelo'
       };
 
+      // Validação dos campos obrigatórios
       if (!dados.nomeCliente || !dados.telefone || !dados.data || !dados.hora || !dados.barbeiroId) {
-        toast('Preencha os campos obrigatórios (*).', 'erro');
+        toast('Preencha todos os campos obrigatórios (*).', 'erro');
         return;
       }
       if (dados.email && !emailValido(dados.email)) {
-        toast('E-mail inválido. Use o formato nome@dominio.com', 'erro');
+        toast('E-mail inválido. Use o formato: nome@dominio.com', 'erro');
         return;
       }
 
@@ -310,13 +365,13 @@
           toast('Agendamento criado com sucesso!');
         }
         fecharModal('modal-agendamento');
-        carregar();
+        carregar(); // Recarrega a lista atualizada
       } catch (e) {
         toast('Erro ao salvar agendamento.', 'erro');
       }
     }
 
-    // ── Deletar ──────────────────────────────────────────────
+    // Exclui um agendamento após confirmação do usuário
     async function deletar(id) {
       if (!confirm('Confirma a exclusão deste agendamento?')) return;
       try {
@@ -324,20 +379,20 @@
         toast('Agendamento removido.');
         carregar();
       } catch (e) {
-        toast('Erro ao deletar.', 'erro');
+        toast('Erro ao deletar agendamento.', 'erro');
       }
     }
 
-    // ── Calcular Valor (Decorator) ───────────────────────────
+    // Abre o modal do Decorator, limpando seleções anteriores
     function abrirCalcular(id) {
       document.getElementById('calcular-id').value = id;
       document.getElementById('resultado-calculo').style.display = 'none';
-      // Desmarca todos os checkboxes
       document.querySelectorAll('#modal-calcular input[type="checkbox"]')
         .forEach(cb => cb.checked = false);
       abrirModal('modal-calcular');
     }
 
+    // Envia os extras selecionados ao backend, que aplica o Decorator e retorna o valor final
     async function aplicarDecorator() {
       const id     = document.getElementById('calcular-id').value;
       const extras = Array.from(
@@ -345,21 +400,22 @@
       ).map(cb => cb.value);
 
       try {
+        // O backend monta a cadeia: CorteBase → Decorator1 → Decorator2 → ...
         const resultado = await api.calcularValor(id, extras);
 
-        // Exibe o resultado do Decorator
+        // Mostra o resultado do encadeamento de Decorators
         document.getElementById('resultado-descricao').textContent = resultado.descricaoServicos;
         document.getElementById('resultado-total').textContent     = formatarMoeda(resultado.valorTotal);
         document.getElementById('resultado-calculo').style.display = 'block';
 
-        toast('Valor calculado e salvo com sucesso!');
-        carregar(); // Atualiza a tabela
+        toast('Valor calculado e salvo!');
+        carregar(); // Atualiza a tabela com o novo valor
       } catch (e) {
         toast('Erro ao calcular valor.', 'erro');
       }
     }
 
-    // Inicia — aplica máscaras e carrega dados
+    // Inicialização: aplica máscaras nos campos e carrega os dados
     aplicarMascaras({ cpf: 'campo-cpf', telefone: 'campo-telefone' });
     carregar();
   </script>

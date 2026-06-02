@@ -1,30 +1,39 @@
 /* ============================================================
-   Sistema de Gestão de Barbearia — Estilo Global
-   Tema: dark elegante com dourado como cor de destaque
+   Barbearia Don Mateus — Folha de Estilos Principal
+   Tema: dark elegante com dourado como destaque
+   Abordagem: mobile-first (pensado primeiro para celular)
    ============================================================ */
 
+/* ── Variáveis de design ───────────────────────────────────── */
 :root {
-  --cor-fundo:        #0f0f0f;
-  --cor-superficie:   #1a1a1a;
-  --cor-card:         #222222;
-  --cor-borda:        #333333;
-  --cor-dourado:      #c8a951;
-  --cor-dourado-hover:#e0c060;
-  --cor-texto:        #e8e8e8;
-  --cor-texto-suave:  #999999;
-  --cor-sucesso:      #4caf7d;
-  --cor-erro:         #e05252;
-  --cor-aviso:        #e0a840;
-  --cor-info:         #5294e0;
-  --raio:             8px;
-  --sombra:           0 4px 20px rgba(0,0,0,0.4);
-  --fonte:            'Segoe UI', system-ui, sans-serif;
+  --cor-fundo:         #0f0f0f;
+  --cor-superficie:    #1a1a1a;
+  --cor-card:          #222222;
+  --cor-borda:         #333333;
+  --cor-dourado:       #c8a951;
+  --cor-dourado-hover: #e0c060;
+  --cor-texto:         #e8e8e8;
+  --cor-texto-suave:   #999999;
+  --cor-sucesso:       #4caf7d;
+  --cor-erro:          #e05252;
+  --cor-aviso:         #e0a840;
+  --cor-info:          #5294e0;
+  --raio:              8px;
+  --sombra:            0 4px 20px rgba(0,0,0,0.4);
+  --fonte:             'Segoe UI', system-ui, sans-serif;
+  --nav-bottom-h:      64px; /* altura da nav inferior no mobile */
 }
 
-* {
+/* ── Reset básico ──────────────────────────────────────────── */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  /* Evita zoom involuntário em inputs no iOS */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -32,10 +41,46 @@ body {
   color: var(--cor-texto);
   font-family: var(--fonte);
   min-height: 100vh;
+  /* No mobile é layout empilhado; no desktop vira flex lado a lado */
   display: flex;
+  flex-direction: column;
 }
 
-/* ── Sidebar ── */
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR (desktop) / BOTTOM NAV (mobile)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Botão hambúrguer — aparece só no mobile ── */
+.menu-toggle {
+  display: none; /* escondido no desktop */
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 400;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  color: var(--cor-dourado);
+  font-size: 1.3rem;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* Overlay que escurece o fundo ao abrir o menu drawer */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 150;
+}
+.sidebar-overlay.open { display: block; }
+
+/* ── Sidebar — estrutura base ── */
 .sidebar {
   width: 240px;
   min-height: 100vh;
@@ -46,7 +91,7 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 100;
+  z-index: 300;
 }
 
 .sidebar-logo {
@@ -64,7 +109,7 @@ body {
 .sidebar-logo p {
   font-size: 0.72rem;
   color: var(--cor-texto-suave);
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .sidebar-nav {
@@ -101,14 +146,10 @@ body {
   text-align: center;
 }
 
-.sidebar-footer {
-  padding: 16px 24px;
-  border-top: 1px solid var(--cor-borda);
-  font-size: 0.75rem;
-  color: var(--cor-texto-suave);
-}
+/* ═══════════════════════════════════════════════════════════
+   CONTEÚDO PRINCIPAL
+   ═══════════════════════════════════════════════════════════ */
 
-/* ── Conteúdo principal ── */
 .main {
   margin-left: 240px;
   flex: 1;
@@ -132,7 +173,10 @@ body {
   margin-top: 4px;
 }
 
-/* ── Cards de estatística (dashboard) ── */
+/* ═══════════════════════════════════════════════════════════
+   CARDS DE ESTATÍSTICA (dashboard)
+   ═══════════════════════════════════════════════════════════ */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -148,7 +192,7 @@ body {
 }
 
 .stat-card .label {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--cor-texto-suave);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -162,12 +206,15 @@ body {
 }
 
 .stat-card .sub {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--cor-texto-suave);
   margin-top: 4px;
 }
 
-/* ── Tabela ── */
+/* ═══════════════════════════════════════════════════════════
+   TABELA
+   ═══════════════════════════════════════════════════════════ */
+
 .table-card {
   background-color: var(--cor-card);
   border: 1px solid var(--cor-borda);
@@ -181,6 +228,8 @@ body {
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid var(--cor-borda);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .table-card-header h3 {
@@ -188,22 +237,29 @@ body {
   font-weight: 600;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* scroll suave no iOS */
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  min-width: 600px; /* força scroll horizontal antes de quebrar */
 }
 
 thead th {
   text-align: left;
   padding: 12px 16px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--cor-texto-suave);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background-color: rgba(255,255,255,0.02);
   border-bottom: 1px solid var(--cor-borda);
+  white-space: nowrap;
 }
 
 tbody tr {
@@ -211,38 +267,103 @@ tbody tr {
   transition: background 0.15s;
 }
 
-tbody tr:last-child {
-  border-bottom: none;
-}
+tbody tr:last-child { border-bottom: none; }
 
-tbody tr:hover {
-  background-color: rgba(255,255,255,0.03);
-}
+tbody tr:hover { background-color: rgba(255,255,255,0.03); }
 
 tbody td {
   padding: 12px 16px;
   color: var(--cor-texto);
+  vertical-align: middle;
 }
 
-/* ── Badges de status ── */
+/* ═══════════════════════════════════════════════════════════
+   CARDS MOBILE (substituem a tabela no celular)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Visíveis apenas no mobile — escondidos no desktop */
+.card-lista { display: none; }
+
+.card-item {
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.card-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.card-item-titulo {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--cor-texto);
+}
+
+.card-item-sub {
+  font-size: 0.75rem;
+  color: var(--cor-texto-suave);
+  margin-top: 2px;
+}
+
+.card-item-linha {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+  margin-bottom: 4px;
+}
+
+.card-item-linha span:last-child {
+  color: var(--cor-texto);
+  text-align: right;
+}
+
+.card-item-acoes {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.card-item-valor {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--cor-dourado);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BADGES DE STATUS
+   ═══════════════════════════════════════════════════════════ */
+
 .badge {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
-.badge-agendado   { background: rgba(82,148,224,0.15); color: var(--cor-info); }
-.badge-confirmado { background: rgba(76,175,125,0.15); color: var(--cor-sucesso); }
-.badge-concluido  { background: rgba(200,169,81,0.15); color: var(--cor-dourado); }
-.badge-cancelado  { background: rgba(224,82,82,0.15);  color: var(--cor-erro); }
-.badge-ativo      { background: rgba(76,175,125,0.15); color: var(--cor-sucesso); }
-.badge-inativo    { background: rgba(224,82,82,0.15);  color: var(--cor-erro); }
+.badge-agendado   { background: rgba(82,148,224,0.15);  color: var(--cor-info); }
+.badge-confirmado { background: rgba(76,175,125,0.15);  color: var(--cor-sucesso); }
+.badge-concluido  { background: rgba(200,169,81,0.15);  color: var(--cor-dourado); }
+.badge-cancelado  { background: rgba(224,82,82,0.15);   color: var(--cor-erro); }
+.badge-ativo      { background: rgba(76,175,125,0.15);  color: var(--cor-sucesso); }
+.badge-inativo    { background: rgba(224,82,82,0.15);   color: var(--cor-erro); }
 
-/* ── Botões ── */
+/* ═══════════════════════════════════════════════════════════
+   BOTÕES
+   ═══════════════════════════════════════════════════════════ */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -255,74 +376,60 @@ tbody td {
   border: none;
   transition: all 0.2s;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.btn-primary {
-  background-color: var(--cor-dourado);
-  color: #111;
-}
-
-.btn-primary:hover {
-  background-color: var(--cor-dourado-hover);
-}
+.btn-primary { background-color: var(--cor-dourado); color: #111; }
+.btn-primary:hover { background-color: var(--cor-dourado-hover); }
 
 .btn-ghost {
   background: transparent;
   color: var(--cor-texto-suave);
   border: 1px solid var(--cor-borda);
 }
-
-.btn-ghost:hover {
-  color: var(--cor-texto);
-  border-color: var(--cor-texto-suave);
-}
+.btn-ghost:hover { color: var(--cor-texto); border-color: var(--cor-texto-suave); }
 
 .btn-danger {
   background: rgba(224,82,82,0.1);
   color: var(--cor-erro);
   border: 1px solid rgba(224,82,82,0.3);
 }
-
-.btn-danger:hover {
-  background: rgba(224,82,82,0.2);
-}
-
-.btn-sm {
-  padding: 5px 10px;
-  font-size: 0.78rem;
-}
+.btn-danger:hover { background: rgba(224,82,82,0.2); }
 
 .btn-success {
   background-color: rgba(76,175,125,0.15);
   color: var(--cor-sucesso);
   border: 1px solid rgba(76,175,125,0.3);
 }
+.btn-success:hover { background-color: rgba(76,175,125,0.25); }
 
-.btn-success:hover {
-  background-color: rgba(76,175,125,0.25);
-}
+.btn-sm { padding: 5px 10px; font-size: 0.78rem; }
 
-/* ── Modal ── */
+.btn-full { width: 100%; justify-content: center; }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+   ═══════════════════════════════════════════════════════════ */
+
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 200;
+  background: rgba(0,0,0,0.72);
+  z-index: 500;
   align-items: center;
   justify-content: center;
+  padding: 16px;
 }
 
-.modal-overlay.open {
-  display: flex;
-}
+.modal-overlay.open { display: flex; }
 
 .modal {
   background-color: var(--cor-card);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
   width: 100%;
-  max-width: 520px;
+  max-width: 540px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--sombra);
@@ -332,14 +439,15 @@ tbody td {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  padding: 18px 24px;
   border-bottom: 1px solid var(--cor-borda);
+  position: sticky;
+  top: 0;
+  background: var(--cor-card);
+  z-index: 1;
 }
 
-.modal-header h3 {
-  font-size: 1rem;
-  font-weight: 600;
-}
+.modal-header h3 { font-size: 1rem; font-weight: 600; }
 
 .modal-close {
   background: none;
@@ -347,32 +455,35 @@ tbody td {
   color: var(--cor-texto-suave);
   font-size: 1.2rem;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.2s;
 }
-
 .modal-close:hover { color: var(--cor-texto); }
 
-.modal-body {
-  padding: 24px;
-}
+.modal-body { padding: 20px 24px; }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 16px 24px;
+  padding: 14px 24px;
   border-top: 1px solid var(--cor-borda);
+  position: sticky;
+  bottom: 0;
+  background: var(--cor-card);
 }
 
-/* ── Formulários ── */
-.form-group {
-  margin-bottom: 16px;
-}
+/* ═══════════════════════════════════════════════════════════
+   FORMULÁRIOS
+   ═══════════════════════════════════════════════════════════ */
+
+.form-group { margin-bottom: 14px; }
 
 .form-group label {
   display: block;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--cor-texto-suave);
   margin-bottom: 6px;
   text-transform: uppercase;
@@ -383,14 +494,22 @@ tbody td {
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 9px 12px;
+  padding: 10px 12px;
   background-color: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
   color: var(--cor-texto);
-  font-size: 0.875rem;
+  font-size: 0.9rem; /* >= 16px evita zoom no iOS */
   font-family: var(--fonte);
   transition: border-color 0.2s;
+  -webkit-appearance: none; /* remove seta padrão no Safari */
+}
+
+.form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
 }
 
 .form-group input:focus,
@@ -400,9 +519,7 @@ tbody td {
   border-color: var(--cor-dourado);
 }
 
-.form-group select option {
-  background-color: var(--cor-card);
-}
+.form-group select option { background-color: var(--cor-card); }
 
 .form-row {
   display: grid;
@@ -411,17 +528,20 @@ tbody td {
 }
 
 .form-divider {
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--cor-dourado);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 20px 0 12px;
+  margin: 18px 0 12px;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--cor-borda);
 }
 
-/* ── Checkboxes de serviços ── */
+/* ═══════════════════════════════════════════════════════════
+   CHECKBOXES DE SERVIÇOS (Decorator)
+   ═══════════════════════════════════════════════════════════ */
+
 .servicos-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -432,27 +552,29 @@ tbody td {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   background-color: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.2s, background 0.2s;
+  user-select: none;
 }
 
-.servico-check:hover {
-  border-color: var(--cor-dourado);
-}
+.servico-check:hover { border-color: var(--cor-dourado); }
 
 .servico-check input[type="checkbox"] {
-  width: auto;
+  width: 16px;
+  height: 16px;
   accent-color: var(--cor-dourado);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.servico-check .nome { font-size: 0.85rem; font-weight: 500; }
-.servico-check .preco { font-size: 0.75rem; color: var(--cor-dourado); }
+.servico-check .nome  { font-size: 0.85rem; font-weight: 500; }
+.servico-check .preco { font-size: 0.75rem; color: var(--cor-dourado); margin-top: 2px; }
 
-/* ── Resultado do Decorator ── */
+/* ── Resultado do cálculo Decorator ── */
 .resultado-calculo {
   background-color: var(--cor-superficie);
   border: 1px solid var(--cor-dourado);
@@ -465,41 +587,45 @@ tbody td {
   font-size: 0.85rem;
   color: var(--cor-texto-suave);
   margin-bottom: 8px;
+  line-height: 1.5;
 }
 
 .resultado-calculo .total {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--cor-dourado);
 }
 
-/* ── Toast ── */
+/* ═══════════════════════════════════════════════════════════
+   TOAST (notificações temporárias)
+   ═══════════════════════════════════════════════════════════ */
+
 .toast-container {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
-  z-index: 500;
+  z-index: 600;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .toast {
-  padding: 12px 16px;
+  padding: 12px 18px;
   border-radius: var(--raio);
   font-size: 0.85rem;
   font-weight: 500;
   box-shadow: var(--sombra);
-  animation: slideIn 0.3s ease;
-  min-width: 240px;
+  animation: slideInRight 0.3s ease;
+  max-width: 320px;
 }
 
 .toast-sucesso { background-color: var(--cor-sucesso); color: #fff; }
 .toast-erro    { background-color: var(--cor-erro);    color: #fff; }
 .toast-info    { background-color: var(--cor-info);    color: #fff; }
 
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
+@keyframes slideInRight {
+  from { transform: translateX(110%); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
 }
 
@@ -513,16 +639,90 @@ tbody td {
 .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
 .empty-state p     { font-size: 0.9rem; }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; }
+/* ── Scrollbar customizada ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--cor-fundo); }
 ::-webkit-scrollbar-thumb { background: var(--cor-borda); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--cor-texto-suave); }
 
-/* ── Responsivo ── */
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVO — MOBILE FIRST
+   Tudo abaixo se aplica apenas a telas menores que 768px
+   ═══════════════════════════════════════════════════════════ */
+
 @media (max-width: 768px) {
-  .sidebar { width: 100%; min-height: auto; position: relative; flex-direction: row; }
-  .main { margin-left: 0; }
-  .form-row { grid-template-columns: 1fr; }
+
+  /* ── Body vira coluna normal (sem sidebar) ── */
+  body { flex-direction: column; }
+
+  /* ── Botão hambúrguer aparece ── */
+  .menu-toggle { display: flex; }
+
+  /* ── Sidebar vira drawer lateral ── */
+  .sidebar {
+    left: -260px;
+    width: 240px;
+    height: 100%;
+    transition: left 0.25s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  }
+  .sidebar.open { left: 0; }
+
+  /* ── Conteúdo principal ocupa a tela toda ── */
+  .main {
+    margin-left: 0;
+    max-width: 100%;
+    padding: 14px;
+    /* Espaço no topo para o botão hambúrguer e na base para a nav inferior */
+    padding-top: 64px;
+    padding-bottom: calc(var(--nav-bottom-h) + 12px);
+  }
+
+  /* ── Stats: 2 colunas menores ── */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-card { padding: 14px; }
+  .stat-card .value { font-size: 1.6rem; }
+
+  /* ── Esconde tabela e mostra cards ── */
+  .table-wrapper { display: none; }
+  .card-lista    { display: block; padding: 12px; }
+
+  /* ── Header da tabela ajustado ── */
+  .table-card-header { padding: 12px 14px; }
+  .page-header h2    { font-size: 1.2rem; }
+  .page-header       { margin-bottom: 18px; }
+
+  /* ── Modal fullscreen no mobile ── */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+  }
+
+  /* ── Formulário: 1 coluna ── */
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .servicos-grid { grid-template-columns: 1fr 1fr; }
+
+  /* ── Toast fica no topo no mobile (menos a nav inferior) ── */
+  .toast-container {
+    bottom: calc(var(--nav-bottom-h) + 12px);
+    right: 10px;
+    left: 10px;
+  }
+  .toast { max-width: 100%; }
+
+  /* ── Botão de ação de largura cheia ── */
+  .btn-primary-mobile { width: 100%; justify-content: center; }
+}
+
+/* ── Telas muito pequenas (< 360px) ── */
+@media (max-width: 360px) {
+  .stats-grid { grid-template-columns: 1fr; }
   .servicos-grid { grid-template-columns: 1fr; }
 }

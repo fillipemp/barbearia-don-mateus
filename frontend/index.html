@@ -6,12 +6,16 @@
   <title>Barbearia Don Mateus | Dashboard</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23c8a951%22>✂</text></svg>">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23c8a951%22>✂</text></svg>">
 </head>
 <body>
 
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">
+  <!-- Botão de abrir menu (visível só no celular) -->
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+  <!-- Fundo escuro que aparece atrás do menu aberto no mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ── Barra lateral de navegação (sidebar) ── -->
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <h1>✂ Don Mateus</h1>
       <p>Barbearia Don Mateus</p>
@@ -21,17 +25,16 @@
       <a href="agendamentos.html" class="nav-item"><span class="icon">📅</span> Agendamentos</a>
       <a href="barbeiros.html"    class="nav-item"><span class="icon">👤</span> Barbeiros</a>
     </nav>
-
   </aside>
 
-  <!-- ── Conteúdo ── -->
+  <!-- ── Conteúdo principal ── -->
   <main class="main">
     <div class="page-header">
       <h2>Dashboard</h2>
       <p>Visão geral da barbearia</p>
     </div>
 
-    <!-- Cards de estatísticas -->
+    <!-- Cards de resumo — carregados via JS -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="label">Agendamentos Hoje</div>
@@ -55,82 +58,126 @@
       </div>
     </div>
 
-    <!-- Tabela de próximos agendamentos -->
+    <!-- Tabela: visível no desktop -->
     <div class="table-card">
       <div class="table-card-header">
-        <h3>Próximos Agendamentos</h3>
+        <h3>Próximos Agendamentos de Hoje</h3>
         <a href="agendamentos.html" class="btn btn-ghost btn-sm">Ver todos</a>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Barbeiro</th>
-            <th>Data</th>
-            <th>Hora</th>
-            <th>Serviços</th>
-            <th>Valor</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-dashboard">
-          <tr><td colspan="7"><div class="empty-state"><p>Carregando...</p></div></td></tr>
-        </tbody>
-      </table>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Barbeiro</th>
+              <th>Hora</th>
+              <th>Serviços</th>
+              <th>Valor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-dashboard">
+            <tr><td colspan="6"><div class="empty-state"><p>Carregando...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cards: visíveis só no celular (mesmos dados, outro layout) -->
+      <div class="card-lista" id="cards-dashboard"></div>
     </div>
   </main>
 
-  <!-- Toast container -->
+  <!-- Container onde os toasts de notificação aparecem -->
   <div class="toast-container" id="toast-container"></div>
 
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/utils.js"></script>
   <script>
+    // Carrega todos os dados necessários para o dashboard
     async function carregarDashboard() {
       try {
+        // Busca agendamentos e barbeiros em paralelo (mais rápido)
         const [agendamentos, barbeiros] = await Promise.all([
           api.listarAgendamentos(),
           api.listarBarbeiros()
         ]);
 
-        const hoje     = new Date().toISOString().split('T')[0];
-        const deHoje   = agendamentos.filter(a => a.data === hoje);
+        // Filtra agendamentos de hoje pela data no formato YYYY-MM-DD
+        const hoje       = new Date().toISOString().split('T')[0];
+        const deHoje     = agendamentos.filter(a => a.data === hoje);
         const concluidos = deHoje.filter(a => a.status === 'concluido');
-        const receita  = concluidos.reduce((s, a) => s + Number(a.valorTotal || 0), 0);
-        const ativos   = barbeiros.filter(b => b.status === 'ativo');
+        const receita    = concluidos.reduce((soma, a) => soma + Number(a.valorTotal || 0), 0);
+        const ativos     = barbeiros.filter(b => b.status === 'ativo');
 
+        // Preenche os cards de resumo
         document.getElementById('stat-hoje').textContent      = deHoje.length;
         document.getElementById('stat-total').textContent     = agendamentos.length;
         document.getElementById('stat-barbeiros').textContent = ativos.length;
         document.getElementById('stat-receita').textContent   = formatarMoeda(receita);
 
-        // Mostra os próximos 5 agendamentos de hoje
+        // Pega os 5 próximos do dia (ou todos se tiver menos)
         const proximos = deHoje.slice(0, 5);
-        const tbody    = document.getElementById('tabela-dashboard');
-
-        if (proximos.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
-            <div class="icon">📅</div><p>Nenhum agendamento para hoje.</p>
-          </div></td></tr>`;
-          return;
-        }
-
-        tbody.innerHTML = proximos.map(a => `
-          <tr>
-            <td>${a.nomeCliente || '—'}</td>
-            <td>${a.barbeiroNome || '—'}</td>
-            <td>${formatarData(a.data)}</td>
-            <td>${a.hora || '—'}</td>
-            <td style="font-size:0.8rem;color:var(--cor-texto-suave)">${a.descricaoServicos || 'Corte de Cabelo'}</td>
-            <td>${formatarMoeda(a.valorTotal)}</td>
-            <td>${badgeStatus(a.status)}</td>
-          </tr>
-        `).join('');
+        renderizarTabela(proximos);
+        renderizarCards(proximos);
 
       } catch (e) {
         toast('Erro ao carregar dados. Verifique se o backend está rodando.', 'erro');
       }
+    }
+
+    // Renderiza a tabela no formato desktop
+    function renderizarTabela(lista) {
+      const tbody = document.getElementById('tabela-dashboard');
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+          <div class="icon">📅</div><p>Nenhum agendamento para hoje.</p>
+        </div></td></tr>`;
+        return;
+      }
+      tbody.innerHTML = lista.map(a => `
+        <tr>
+          <td><strong>${a.nomeCliente || '—'}</strong></td>
+          <td>${a.barbeiroNome || '—'}</td>
+          <td>${a.hora || '—'}</td>
+          <td style="font-size:0.8rem;color:var(--cor-texto-suave);max-width:200px">
+            ${a.descricaoServicos || 'Corte de Cabelo'}
+          </td>
+          <td style="font-weight:600;color:var(--cor-dourado)">${formatarMoeda(a.valorTotal)}</td>
+          <td>${badgeStatus(a.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Renderiza os cards no formato mobile (mesmos dados, layout em card)
+    function renderizarCards(lista) {
+      const container = document.getElementById('cards-dashboard');
+      if (lista.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+          <div class="icon">📅</div><p>Nenhum agendamento para hoje.</p>
+        </div>`;
+        return;
+      }
+      container.innerHTML = lista.map(a => `
+        <div class="card-item">
+          <div class="card-item-header">
+            <div>
+              <div class="card-item-titulo">${a.nomeCliente || '—'}</div>
+              <div class="card-item-sub">${a.hora || ''} — ${a.barbeiroNome || 'Barbeiro não definido'}</div>
+            </div>
+            ${badgeStatus(a.status)}
+          </div>
+          <div class="card-item-linha">
+            <span>Serviços</span>
+            <span>${a.descricaoServicos || 'Corte de Cabelo'}</span>
+          </div>
+          <div class="card-item-linha">
+            <span>Valor total</span>
+            <span class="card-item-valor">${formatarMoeda(a.valorTotal)}</span>
+          </div>
+        </div>
+      `).join('');
     }
 
     carregarDashboard();

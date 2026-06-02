@@ -1,5 +1,22 @@
 // utils.js — Funções utilitárias reutilizáveis em todas as páginas.
 
+// ── Menu hambúrguer (mobile) ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (!toggle) return;
+
+  function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); }
+  function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+
+  toggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeMenu() : openMenu());
+  overlay.addEventListener('click', closeMenu);
+
+  // Fechar ao clicar em qualquer link da nav (navega para outra página)
+  sidebar.querySelectorAll('.nav-item').forEach(a => a.addEventListener('click', closeMenu));
+});
+
 // Exibe um toast de notificação temporário
 function toast(mensagem, tipo = 'sucesso') {
   const container = document.getElementById('toast-container');
