@@ -129,6 +129,12 @@
           <label>Observação</label>
           <textarea id="campo-observacao" rows="2" placeholder="Alguma preferência ou detalhe..."></textarea>
         </div>
+
+        <!-- Campos ocultos que preservam o valor já calculado pelo Decorator -->
+        <!-- Sem eles, editar o status sobrescreveria o valorTotal com R$ 30 fixo -->
+        <input type="hidden" id="campo-valorBase" value="30" />
+        <input type="hidden" id="campo-valorTotal" value="30" />
+        <input type="hidden" id="campo-descricaoServicos" value="Corte de Cabelo" />
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="fecharModal('modal-agendamento')">Cancelar</button>
@@ -296,17 +302,21 @@
 
     // Abre o modal em modo "Novo Agendamento" com os campos limpos
     function abrirModalNovo() {
-      document.getElementById('modal-titulo').textContent     = 'Novo Agendamento';
-      document.getElementById('campo-id').value               = '';
-      document.getElementById('campo-nomeCliente').value      = '';
-      document.getElementById('campo-cpf').value              = '';
-      document.getElementById('campo-telefone').value         = '';
-      document.getElementById('campo-email').value            = '';
-      document.getElementById('campo-data').value             = new Date().toISOString().split('T')[0];
-      document.getElementById('campo-hora').value             = '';
-      document.getElementById('campo-barbeiroId').value       = '';
-      document.getElementById('campo-status').value           = 'agendado';
-      document.getElementById('campo-observacao').value       = '';
+      document.getElementById('modal-titulo').textContent          = 'Novo Agendamento';
+      document.getElementById('campo-id').value                    = '';
+      document.getElementById('campo-nomeCliente').value           = '';
+      document.getElementById('campo-cpf').value                   = '';
+      document.getElementById('campo-telefone').value              = '';
+      document.getElementById('campo-email').value                 = '';
+      document.getElementById('campo-data').value                  = new Date().toISOString().split('T')[0];
+      document.getElementById('campo-hora').value                  = '';
+      document.getElementById('campo-barbeiroId').value            = '';
+      document.getElementById('campo-status').value                = 'agendado';
+      document.getElementById('campo-observacao').value            = '';
+      // Valores iniciais padrão — serão atualizados pelo Decorator depois
+      document.getElementById('campo-valorBase').value             = '30';
+      document.getElementById('campo-valorTotal').value            = '30';
+      document.getElementById('campo-descricaoServicos').value     = 'Corte de Cabelo';
       abrirModal('modal-agendamento');
     }
 
@@ -314,17 +324,21 @@
     function abrirEditar(id) {
       const a = agendamentos.find(x => x.id === id);
       if (!a) return;
-      document.getElementById('modal-titulo').textContent     = 'Editar Agendamento';
-      document.getElementById('campo-id').value               = a.id;
-      document.getElementById('campo-nomeCliente').value      = a.nomeCliente || '';
-      document.getElementById('campo-cpf').value              = a.cpf || '';
-      document.getElementById('campo-telefone').value         = a.telefone || '';
-      document.getElementById('campo-email').value            = a.email || '';
-      document.getElementById('campo-data').value             = a.data || '';
-      document.getElementById('campo-hora').value             = a.hora || '';
-      document.getElementById('campo-barbeiroId').value       = a.barbeiroId || '';
-      document.getElementById('campo-status').value           = a.status || 'agendado';
-      document.getElementById('campo-observacao').value       = a.observacao || '';
+      document.getElementById('modal-titulo').textContent          = 'Editar Agendamento';
+      document.getElementById('campo-id').value                    = a.id;
+      document.getElementById('campo-nomeCliente').value           = a.nomeCliente || '';
+      document.getElementById('campo-cpf').value                   = a.cpf || '';
+      document.getElementById('campo-telefone').value              = a.telefone || '';
+      document.getElementById('campo-email').value                 = a.email || '';
+      document.getElementById('campo-data').value                  = a.data || '';
+      document.getElementById('campo-hora').value                  = a.hora || '';
+      document.getElementById('campo-barbeiroId').value            = a.barbeiroId || '';
+      document.getElementById('campo-status').value                = a.status || 'agendado';
+      document.getElementById('campo-observacao').value            = a.observacao || '';
+      // Preserva os valores já calculados pelo Decorator — evita sobrescrever com R$ 30 fixo
+      document.getElementById('campo-valorBase').value             = a.valorBase || '30';
+      document.getElementById('campo-valorTotal').value            = a.valorTotal || '30';
+      document.getElementById('campo-descricaoServicos').value     = a.descricaoServicos || 'Corte de Cabelo';
       abrirModal('modal-agendamento');
     }
 
@@ -341,9 +355,11 @@
         barbeiroId:        document.getElementById('campo-barbeiroId').value,
         status:            document.getElementById('campo-status').value,
         observacao:        document.getElementById('campo-observacao').value.trim(),
-        valorBase:         30,       // Valor do CorteBase (serviço mínimo)
-        valorTotal:        30,       // Será recalculado pelo Decorator se extras forem adicionados
-        descricaoServicos: 'Corte de Cabelo'
+        // Usa os valores dos campos ocultos — preserva o que o Decorator calculou
+        // Assim mudar o status para "concluido" não zera o valorTotal
+        valorBase:         parseFloat(document.getElementById('campo-valorBase').value) || 30,
+        valorTotal:        parseFloat(document.getElementById('campo-valorTotal').value) || 30,
+        descricaoServicos: document.getElementById('campo-descricaoServicos').value || 'Corte de Cabelo'
       };
 
       // Validação dos campos obrigatórios
@@ -403,13 +419,19 @@
         // O backend monta a cadeia: CorteBase → Decorator1 → Decorator2 → ...
         const resultado = await api.calcularValor(id, extras);
 
-        // Mostra o resultado do encadeamento de Decorators
+        // Mostra o resultado brevemente e fecha o modal automaticamente
         document.getElementById('resultado-descricao').textContent = resultado.descricaoServicos;
         document.getElementById('resultado-total').textContent     = formatarMoeda(resultado.valorTotal);
         document.getElementById('resultado-calculo').style.display = 'block';
 
-        toast('Valor calculado e salvo!');
-        carregar(); // Atualiza a tabela com o novo valor
+        toast('Valor calculado e salvo: ' + formatarMoeda(resultado.valorTotal));
+
+        // Fecha o modal após 1,5s para o usuário ver o resultado
+        setTimeout(() => {
+          fecharModal('modal-calcular');
+          carregar(); // Atualiza a tabela com o novo valor
+        }, 1500);
+
       } catch (e) {
         toast('Erro ao calcular valor.', 'erro');
       }
