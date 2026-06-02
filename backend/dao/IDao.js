@@ -1,30 +1,32 @@
-// Interface IDao — contrato que todos os DAOs devem seguir.
-// Aplica o princípio DIP (Dependency Inversion Principle) do SOLID:
-// os módulos de alto nível (Commands) dependem desta abstração,
-// não das implementações concretas (AgendamentoDAO, BarbeiroDAO, etc).
+// IDao.js
+// Define os métodos que todo DAO do sistema precisa ter.
+// É basicamente um "contrato": qualquer DAO que não implementar esses métodos
+// vai lançar um erro explicando o que falta.
 //
-// Também garante o LSP (Liskov Substitution Principle):
-// qualquer DAO concreto pode substituir IDao sem quebrar o sistema.
+// Por que fazer isso em vez de só escrever os métodos direto em cada DAO?
+// Porque assim os Commands não precisam saber qual DAO estão usando.
+// Se um dia trocar o Firebase por MongoDB, só muda o DAO — o Command não sabe
+// nem que isso aconteceu. Isso é o DIP (D do SOLID).
 
 class IDao {
   async inserir(_dados) {
-    throw new Error('O método inserir() deve ser implementado pelo DAO concreto.');
+    throw new Error('inserir() não foi implementado neste DAO.');
   }
 
   async deletar(_id) {
-    throw new Error('O método deletar() deve ser implementado pelo DAO concreto.');
+    throw new Error('deletar() não foi implementado neste DAO.');
   }
 
   async atualizar(_dados) {
-    throw new Error('O método atualizar() deve ser implementado pelo DAO concreto.');
+    throw new Error('atualizar() não foi implementado neste DAO.');
   }
 
   async buscarPorId(_id) {
-    throw new Error('O método buscarPorId() deve ser implementado pelo DAO concreto.');
+    throw new Error('buscarPorId() não foi implementado neste DAO.');
   }
 
   async buscarTodos() {
-    throw new Error('O método buscarTodos() deve ser implementado pelo DAO concreto.');
+    throw new Error('buscarTodos() não foi implementado neste DAO.');
   }
 }
 

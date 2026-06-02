@@ -1,21 +1,20 @@
-// ServicoDecorator — Decorator abstrato do padrão Decorator (GoF).
+// ServicoDecorator.js
+// Essa é a classe "meio" do Decorator — todos os extras (Barba, Sobrancelha...) herdam dela.
+// Ela guarda uma referência ao serviço que está "decorando" (pode ser o CorteBase
+// ou outro Decorator que já foi aplicado antes).
 //
-// Mantém uma referência ao IServico que está sendo decorado.
-// Todos os decoradores concretos (DecoratorBarba, etc.) herdam desta classe.
-//
-// O LSP é respeitado: qualquer ServicoDecorator pode substituir
-// um IServico sem quebrar o sistema.
+// O truque é simples: quando o Decorator calcula o valor, ele soma o próprio preço
+// ao valor do serviço que está dentro dele. Isso cria o encadeamento.
+// Ex: DecoratorBarba.calcularValor() => corteBase.calcularValor() + 20
 
 const IServico = require('./IServico');
 
 class ServicoDecorator extends IServico {
-  // Recebe o serviço a ser decorado (pode ser CorteBase ou outro Decorator)
   constructor(servico) {
     super();
-    this._servico = servico;
+    this._servico = servico; // o serviço que esse decorator está "embrulhando"
   }
 
-  // Delega para o serviço decorado — subclasses sobrescrevem e enriquecem
   getDescricao() {
     return this._servico.getDescricao();
   }

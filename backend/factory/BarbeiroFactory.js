@@ -1,11 +1,12 @@
-// Factory do Barbeiro — padrão Factory Method do GoF (Criacional).
-// Centraliza a criação de objetos Barbeiro usando o BarbeiroBuilder internamente.
+// BarbeiroFactory.js
+// Centraliza a criação de objetos Barbeiro usando o Builder internamente.
+// As rotas e Commands usam essa Factory — nenhum deles precisa saber
+// como o Builder funciona por dentro.
 
 const BarbeiroBuilder = require('../builder/BarbeiroBuilder');
 
 class BarbeiroFactory {
-
-  // Cria um Barbeiro a partir dos dados brutos (ex: body da requisição)
+  // Cria um Barbeiro novo a partir dos dados brutos (ex: corpo da requisição)
   static criar(dados) {
     return new BarbeiroBuilder()
       .comNome(dados.nome)
@@ -18,11 +19,12 @@ class BarbeiroFactory {
       .comSalario(dados.salario)
       .comHorarioInicio(dados.horarioInicio)
       .comHorarioFim(dados.horarioFim)
+      .comDiasTrabalho(dados.diasTrabalho)
       .comEndereco(dados.enderecoId)
       .construir();
   }
 
-  // Cria um Barbeiro com id (usado ao atualizar)
+  // Cria com ID (usado ao atualizar, onde o ID já existe)
   static criarComId(id, dados) {
     return new BarbeiroBuilder()
       .comId(id)
@@ -36,6 +38,7 @@ class BarbeiroFactory {
       .comSalario(dados.salario)
       .comHorarioInicio(dados.horarioInicio)
       .comHorarioFim(dados.horarioFim)
+      .comDiasTrabalho(dados.diasTrabalho)
       .comEndereco(dados.enderecoId)
       .construir();
   }

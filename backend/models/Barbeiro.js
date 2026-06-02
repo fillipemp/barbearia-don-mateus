@@ -1,21 +1,11 @@
-// Model do Barbeiro — representa um barbeiro cadastrado no sistema.
-// Relacionamento: um Barbeiro possui muitos Agendamentos (1:N).
-//                 um Barbeiro possui um Endereco (1:1).
+// Barbeiro.js — representa um barbeiro cadastrado no sistema.
+// Relacionamentos: tem um Endereço (1:1) e muitos Agendamentos (1:N).
 
 class Barbeiro {
   constructor(
-    id,
-    nome,
-    cpf,
-    email,
-    telefone,
-    especialidade,
-    status,
-    dataAdmissao,
-    salario,
-    horarioInicio,
-    horarioFim,
-    enderecoId
+    id, nome, cpf, email, telefone,
+    especialidade, status, dataAdmissao,
+    salario, horarioInicio, horarioFim, diasTrabalho, enderecoId
   ) {
     this.id            = id;
     this.nome          = nome;
@@ -28,7 +18,8 @@ class Barbeiro {
     this.salario       = salario;
     this.horarioInicio = horarioInicio;
     this.horarioFim    = horarioFim;
-    this.enderecoId    = enderecoId;
+    this.diasTrabalho  = diasTrabalho;
+    this.enderecoId    = enderecoId; // chave do Endereço (relacionamento 1:1)
   }
 }
 

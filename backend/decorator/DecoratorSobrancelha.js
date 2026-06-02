@@ -1,5 +1,4 @@
-// DecoratorSobrancelha — ConcreteDecorator do padrão Decorator.
-// Adiciona o serviço de sobrancelha ao agendamento: +R$ 10,00.
+// DecoratorSobrancelha.js — adiciona design de sobrancelha: +R$ 10,00
 
 const ServicoDecorator = require('./ServicoDecorator');
 

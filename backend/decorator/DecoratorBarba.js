@@ -1,5 +1,6 @@
-// DecoratorBarba — ConcreteDecorator do padrão Decorator.
-// Adiciona o serviço de barba ao agendamento: +R$ 20,00.
+// DecoratorBarba.js
+// Adiciona o serviço de barba ao agendamento: mais R$ 20,00 e " + Barba" na descrição.
+// Herda de ServicoDecorator, então tem acesso ao serviço que está embrulhando.
 
 const ServicoDecorator = require('./ServicoDecorator');
 

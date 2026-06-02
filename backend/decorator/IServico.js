@@ -1,25 +1,22 @@
-// IServico — Component do padrão Decorator (GoF - Estrutural).
+// IServico.js
+// Essa é a "interface" que define o contrato de qualquer serviço da barbearia.
+// Todo serviço precisa saber duas coisas: o que ele é (getDescricao) e quanto custa (calcularValor).
 //
-// Define o contrato (interface) que todos os serviços e decoradores
-// devem seguir. Isso garante o DIP do SOLID: o código de alto nível
-// depende dessa abstração, não de implementações concretas.
+// Por que isso importa? O Decorator funciona justamente porque ele não precisa saber
+// se está "em volta" de um CorteBase ou de outro Decorator — qualquer coisa que
+// implemente esses dois métodos serve. É assim que o encadeamento funciona.
 //
-// Estrutura do Decorator (conforme visto em aula):
-//   IServico          ← Component (esta interface)
-//   CorteBase         ← ConcreteComponent
-//   ServicoDecorator  ← Decorator abstrato
-//   DecoratorBarba,   ← ConcreteDecorators
-//   DecoratorHidratacao, etc.
+// No contexto do SOLID: isso é o DIP na prática. O CalcularValorAgendamentoCommand
+// usa IServico, não uma classe concreta. Então amanhã, se criar um novo serviço,
+// não precisa mudar nada no Command.
 
 class IServico {
-  // Retorna a descrição completa do serviço (com todos os extras aplicados)
   getDescricao() {
-    throw new Error('getDescricao() deve ser implementado.');
+    throw new Error('Precisa implementar getDescricao().');
   }
 
-  // Retorna o valor total do serviço (com todos os extras aplicados)
   calcularValor() {
-    throw new Error('calcularValor() deve ser implementado.');
+    throw new Error('Precisa implementar calcularValor().');
   }
 }
 

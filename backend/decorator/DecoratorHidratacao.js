@@ -1,5 +1,4 @@
-// DecoratorHidratacao — ConcreteDecorator do padrão Decorator.
-// Adiciona o serviço de hidratação capilar ao agendamento: +R$ 25,00.
+// DecoratorHidratacao.js — adiciona hidratação capilar: +R$ 25,00
 
 const ServicoDecorator = require('./ServicoDecorator');
 

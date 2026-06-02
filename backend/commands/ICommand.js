@@ -1,12 +1,15 @@
-// ICommand — interface base para todos os Commands (GoF - Comportamental).
+// ICommand.js
+// A "regra" que todo Command do sistema precisa seguir: ter um método executar().
+// Isso permite que as rotas do Express chamem command.executar() sem saber
+// qual operação está sendo feita por baixo.
 //
-// Aplica o DIP do SOLID: os controllers (alto nível) dependem desta
-// abstração, não dos commands concretos (baixo nível).
-// Cada Command encapsula uma única operação de negócio (SRP).
+// É o mesmo raciocínio do IDao: dependemos da abstração, não da implementação.
+// Isso é o DIP do SOLID — e também facilita muito se quiser adicionar
+// novos comportamentos sem mexer nas rotas.
 
 class ICommand {
   async executar() {
-    throw new Error('executar() deve ser implementado pelo Command concreto.');
+    throw new Error('executar() não foi implementado neste Command.');
   }
 }
 

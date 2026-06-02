@@ -1,5 +1,4 @@
-// DecoratorTratamentoCapilar — ConcreteDecorator do padrão Decorator.
-// Adiciona tratamento capilar premium ao agendamento: +R$ 35,00.
+// DecoratorTratamentoCapilar.js — adiciona tratamento capilar premium: +R$ 35,00
 
 const ServicoDecorator = require('./ServicoDecorator');
 
